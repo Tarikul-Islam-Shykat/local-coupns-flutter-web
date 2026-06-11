@@ -54,6 +54,47 @@ flutter build web --release
 
 If either command fails, fix the code before expecting Vercel to work.
 
+## 5.1 Recommended pre-push checklist
+
+Run these steps every time before you push to GitHub:
+
+1. Format the code
+
+```bash
+dart format .
+```
+
+2. Check for issues
+
+```bash
+flutter analyze
+```
+
+3. Build the release web app
+
+```bash
+flutter build web --release
+```
+
+4. Commit your changes
+
+```bash
+git add .
+git commit -m "your message"
+```
+
+5. Push to GitHub
+
+```bash
+git push
+```
+
+Why this matters:
+
+- `flutter build web --release` makes sure Vercel gets a fresh production build.
+- If you skip the release build, Vercel may deploy an older or incomplete web output.
+- If you change routes, auth, or dashboard pages, the release build is the safest check before pushing.
+
 ## 6. What to fix if Vercel shows 404
 
 If the site deploys but the page still shows `404: NOT_FOUND`, fix these in order:
@@ -97,6 +138,8 @@ If you want someone else to fix Vercel, send this:
 ## 11. Keep this in mind
 
 For Flutter web, Vercel is usually just a static file host. The important part is not the Dart source itself, but the generated `build/web` folder and the config that tells Vercel how to serve it.
+
+If the code looks updated locally but Vercel still shows old behavior, the first thing to verify is whether `flutter build web --release` was run before the push.
 
 ## 12. Login returns `null` in Flutter web
 
