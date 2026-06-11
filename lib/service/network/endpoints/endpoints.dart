@@ -64,4 +64,6 @@ class Urls {
 
   static const String userMySubscription =
       "$baseUrl/user-subscription/my-subscription";
+
+  static const String adminDashboardOverview = '$baseUrl/admindashboards';
 }

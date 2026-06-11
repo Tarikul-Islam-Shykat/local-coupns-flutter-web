@@ -7,6 +7,7 @@ import '../../../../global/custom_snackbar.dart';
 import '../../../../service/network/endpoints/endpoints.dart';
 import '../../../../service/network/service/api_service.dart';
 import '../../../../service/storage/local_storage/local_storage.dart';
+import '../../../../routes/app_routes.dart';
 import '../model/login_model.dart';
 
 class LoginController extends GetxController {
@@ -112,9 +113,17 @@ class LoginController extends GetxController {
         await _localService.setValue(PreferenceKey.role, loginResponse.role!);
       }
 
+      if ((loginResponse.userId ?? '').isNotEmpty) {
+        await _localService.setValue(
+          PreferenceKey.userId,
+          loginResponse.userId!,
+        );
+      }
+
       await _localService.setValue(PreferenceKey.rememberMe, true);
 
       showSnackBar(true, loginResponse.message ?? 'Login successful.');
+      Get.offAllNamed(AppRoutes.adminDashboard);
     } catch (error, stackTrace) {
       debugPrint('Login error: $error');
       log('Login error: $error', stackTrace: stackTrace);

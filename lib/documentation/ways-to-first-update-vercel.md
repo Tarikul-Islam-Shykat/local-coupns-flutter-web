@@ -97,3 +97,31 @@ If you want someone else to fix Vercel, send this:
 ## 11. Keep this in mind
 
 For Flutter web, Vercel is usually just a static file host. The important part is not the Dart source itself, but the generated `build/web` folder and the config that tells Vercel how to serve it.
+
+## 12. Login returns `null` in Flutter web
+
+If login works in Postman but Flutter web shows `null`, check CORS first.
+
+What happened in this project:
+
+- The backend login endpoint returned `200 OK` in `curl` and Postman.
+- The browser still blocked the response because `Access-Control-Allow-Origin` was missing.
+- The backend had `Access-Control-Allow-Credentials: true`, so it needed to explicitly allow the frontend origin.
+
+What to fix:
+
+- Allow the Flutter local origin during development.
+- Allow the Vercel frontend origin in production.
+- Make sure `OPTIONS` preflight is handled.
+- Return `Access-Control-Allow-Origin` for the allowed origin, not `*`, when credentials are enabled.
+
+How to recognize it:
+
+- The request payload prints in Flutter logs.
+- The response becomes `null`.
+- Chrome DevTools may show a CORS or `Failed to fetch` message.
+- `curl` and Postman still work.
+
+Short note to send to backend dev:
+
+> Flutter web is hitting a CORS block. Postman works, but Chrome gets `null` because the response does not include `Access-Control-Allow-Origin` for the Flutter origin. Please whitelist the local Flutter origin and the Vercel frontend domain, and make sure preflight `OPTIONS` is handled.

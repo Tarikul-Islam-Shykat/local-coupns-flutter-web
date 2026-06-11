@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import 'features/admin/dashboard/controller/admin_dashboard_controller.dart';
+import 'features/admin/dashboard/ui/admin_dashboard_page.dart';
 import 'features/auth/login/controller/login_controller.dart';
 import 'features/auth/login/ui/login_page.dart';
 import 'routes/app_routes.dart';
@@ -30,6 +32,16 @@ class LocalCouponsApp extends StatelessWidget {
           }),
           getPages: [
             GetPage(name: AppRoutes.login, page: () => const LoginPage()),
+            GetPage(
+              name: AppRoutes.adminDashboard,
+              page: () => const AdminDashboardPage(),
+              binding: BindingsBuilder(() {
+                Get.lazyPut<AdminDashboardController>(
+                  () => AdminDashboardController(),
+                  fenix: true,
+                );
+              }),
+            ),
           ],
           theme: ThemeData(
             useMaterial3: true,
