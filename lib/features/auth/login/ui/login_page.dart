@@ -5,6 +5,7 @@ import '../../../../const/app_colors.dart';
 import '../../../../global/app_btn.dart';
 import '../../../../global/custom_snackbar.dart';
 import '../../../../global/custom_text.dart';
+import '../../../../global/responsive.dart';
 import '../../../../global/text_form_field.dart';
 import '../controller/login_controller.dart';
 
@@ -18,32 +19,22 @@ class LoginPage extends GetView<LoginController> {
         children: [
           const Positioned.fill(child: _LoginBackground()),
           SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                final isDesktop = width >= 1024;
-                final isTablet = width >= 720 && width < 1024;
-                final horizontalPadding = isDesktop
-                    ? 32.0
-                    : isTablet
-                    ? 24.0
-                    : 16.0;
-                final contentWidth = isDesktop ? 1180.0 : 560.0;
-
+            child: ResponsiveLayout(
+              builder: (context, info) {
                 return Center(
                   child: SingleChildScrollView(
                     padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                      vertical: isDesktop ? 32 : 20,
+                      horizontal: info.horizontalPadding,
+                      vertical: info.verticalPadding,
                     ),
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: contentWidth),
-                      child: isDesktop
+                      constraints: BoxConstraints(maxWidth: info.contentWidth),
+                      child: info.isDesktop
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const Expanded(flex: 5, child: _HeroPanel()),
-                                const SizedBox(width: 28),
+                                SizedBox(width: info.gap),
                                 Expanded(
                                   flex: 5,
                                   child: _FormPanel(controller: controller),
@@ -54,7 +45,7 @@ class LoginPage extends GetView<LoginController> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const _HeroPanel(compact: true),
-                                const SizedBox(height: 24),
+                                SizedBox(height: info.gap + 8),
                                 _FormPanel(controller: controller),
                               ],
                             ),
