@@ -17,7 +17,6 @@ class SecureStorageService {
   Future<void> clearAll() => _storage.deleteAll();
 }
 
-
 /* Usage Example 
 // set
 await secureStorage.set(SecureStorageService.token, 'mytoken');

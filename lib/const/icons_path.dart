@@ -1,13 +1,16 @@
 class IconsPath {
-  static const String business_owner_icon = "assets/icon/business_owner_icon.png";
+  static const String business_owner_icon =
+      "assets/icon/business_owner_icon.png";
   static const String shopper_owner_icon = "assets/icon/shopper_icon.png";
-  static const String blackBusinessOwnerIcon = "assets/icon/business_owner_icon.png";
+  static const String blackBusinessOwnerIcon =
+      "assets/icon/business_owner_icon.png";
 
   static const String blackShopperIcon = "assets/icon/shopper_icon.png";
 
   static const String blackCatAutoCarIcon = "assets/icon/auto-services.png";
 
-  static const String blackCatEntertainmentIcon = "assets/icon/entertainment.png";
+  static const String blackCatEntertainmentIcon =
+      "assets/icon/entertainment.png";
 
   static const String blackCatFamilyIcon = "assets/icon/family.png";
 

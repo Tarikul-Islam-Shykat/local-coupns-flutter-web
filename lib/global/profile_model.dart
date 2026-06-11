@@ -231,21 +231,21 @@ class BusinessProfile {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'userId': userId,
-        'bussinessName': bussinessName,
-        'logo': logo,
-        'address': address,
-        'city': city,
-        'category': category,
-        'website': website,
-        'phone': phone,
-        'activeOffers': activeOffers,
-        'redemption': redemption,
-        'isSubscribed': isSubscribed,
-        'LTV': ltv,
-        'isApproved': isApproved,
-        'createdAt': createdAt?.toIso8601String(),
-        'updatedAt': updatedAt?.toIso8601String(),
-      };
+    'id': id,
+    'userId': userId,
+    'bussinessName': bussinessName,
+    'logo': logo,
+    'address': address,
+    'city': city,
+    'category': category,
+    'website': website,
+    'phone': phone,
+    'activeOffers': activeOffers,
+    'redemption': redemption,
+    'isSubscribed': isSubscribed,
+    'LTV': ltv,
+    'isApproved': isApproved,
+    'createdAt': createdAt?.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
+  };
 }

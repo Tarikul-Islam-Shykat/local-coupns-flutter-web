@@ -1,5 +1,3 @@
-
-
 extension StringFormatX on String {
   String toReadable() => toLowerCase()
       .replaceAll('_', ' ')

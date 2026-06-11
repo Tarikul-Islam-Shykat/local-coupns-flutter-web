@@ -39,15 +39,9 @@ class _SlideUpFadeState extends State<SlideUpFade>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    _opacity = CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    );
+    _opacity = CurvedAnimation(parent: _controller, curve: widget.curve);
 
     _slide = Tween<Offset>(
       begin: Offset(0, widget.offsetY / 100), // normalised — FractionalOffset
@@ -70,10 +64,7 @@ class _SlideUpFadeState extends State<SlideUpFade>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _slide, child: widget.child),
     );
   }
 }

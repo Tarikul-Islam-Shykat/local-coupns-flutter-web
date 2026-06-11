@@ -48,7 +48,8 @@ class DevelopmentDialog {
               ),
               SizedBox(height: 12.h),
               normalTextv2(
-                text: "The Shopper experience is currently being carefully crafted. Please check back soon for the full release!",
+                text:
+                    "The Shopper experience is currently being carefully crafted. Please check back soon for the full release!",
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 color: Colors.grey[700]!,

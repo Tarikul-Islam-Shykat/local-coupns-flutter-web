@@ -70,26 +70,23 @@ class _SnackbarContentState extends State<_SnackbarContent>
           color: isSuccess ? Colors.white : Colors.black,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color:
-                isSuccess
-                    ? Colors.black.withValues(alpha: 0.1)
-                    : Colors.white.withValues(alpha: 0.2),
+            color: isSuccess
+                ? Colors.black.withValues(alpha: 0.1)
+                : Colors.white.withValues(alpha: 0.2),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color:
-                  isSuccess
-                      ? Colors.black.withValues(alpha: 0.15)
-                      : Colors.white.withValues(alpha: 0.1),
+              color: isSuccess
+                  ? Colors.black.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
             BoxShadow(
-              color:
-                  isSuccess
-                      ? Colors.green.withValues(alpha: 0.1)
-                      : Colors.red.withValues(alpha: 0.1),
+              color: isSuccess
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               blurRadius: 30,
               offset: const Offset(0, 4),
               spreadRadius: -5,
@@ -130,19 +127,15 @@ class _SnackbarContentState extends State<_SnackbarContent>
                               width: 6,
                               height: 6,
                               decoration: BoxDecoration(
-                                color:
-                                    isSuccess
-                                        ? Colors.green.shade600
-                                        : Colors.red.shade400,
+                                color: isSuccess
+                                    ? Colors.green.shade600
+                                    : Colors.red.shade400,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        isSuccess
-                                            ? Colors.green.withValues(
-                                              alpha: 0.5,
-                                            )
-                                            : Colors.red.withValues(alpha: 0.5),
+                                    color: isSuccess
+                                        ? Colors.green.withValues(alpha: 0.5)
+                                        : Colors.red.withValues(alpha: 0.5),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                   ),
@@ -156,10 +149,9 @@ class _SnackbarContentState extends State<_SnackbarContent>
                           widget.message,
                           style: TextStyle(
                             fontSize: 14,
-                            color:
-                                isSuccess
-                                    ? Colors.black.withValues(alpha: 0.7)
-                                    : Colors.white.withValues(alpha: 0.8),
+                            color: isSuccess
+                                ? Colors.black.withValues(alpha: 0.7)
+                                : Colors.white.withValues(alpha: 0.8),
                             height: 1.3,
                             fontWeight: FontWeight.w500,
                           ),
@@ -179,16 +171,14 @@ class _SnackbarContentState extends State<_SnackbarContent>
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color:
-                            isSuccess
-                                ? Colors.black.withValues(alpha: 0.05)
-                                : Colors.white.withValues(alpha: 0.1),
+                        color: isSuccess
+                            ? Colors.black.withValues(alpha: 0.05)
+                            : Colors.white.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color:
-                              isSuccess
-                                  ? Colors.black.withValues(alpha: 0.08)
-                                  : Colors.white.withValues(alpha: 0.15),
+                          color: isSuccess
+                              ? Colors.black.withValues(alpha: 0.08)
+                              : Colors.white.withValues(alpha: 0.15),
                           width: 1,
                         ),
                       ),
@@ -196,10 +186,9 @@ class _SnackbarContentState extends State<_SnackbarContent>
                         child: Icon(
                           Icons.close_rounded,
                           size: 18,
-                          color:
-                              isSuccess
-                                  ? Colors.black.withValues(alpha: 0.6)
-                                  : Colors.white.withValues(alpha: 0.7),
+                          color: isSuccess
+                              ? Colors.black.withValues(alpha: 0.6)
+                              : Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ),
@@ -219,10 +208,9 @@ class _SnackbarContentState extends State<_SnackbarContent>
                   ),
                   child: LinearProgressIndicator(
                     value: 1 - _progressController.value,
-                    backgroundColor:
-                        isSuccess
-                            ? Colors.black.withValues(alpha: 0.05)
-                            : Colors.white.withValues(alpha: 0.1),
+                    backgroundColor: isSuccess
+                        ? Colors.black.withValues(alpha: 0.05)
+                        : Colors.white.withValues(alpha: 0.1),
                     valueColor: AlwaysStoppedAnimation(
                       isSuccess ? Colors.green.shade600 : Colors.red.shade400,
                     ),
@@ -280,16 +268,14 @@ class _AnimatedIconBubbleState extends State<_AnimatedIconBubble>
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color:
-            widget.isSuccess
-                ? Colors.black.withValues(alpha: 0.05)
-                : Colors.white.withValues(alpha: 0.1),
+        color: widget.isSuccess
+            ? Colors.black.withValues(alpha: 0.05)
+            : Colors.white.withValues(alpha: 0.1),
         shape: BoxShape.circle,
         border: Border.all(
-          color:
-              widget.isSuccess
-                  ? Colors.black.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.2),
+          color: widget.isSuccess
+              ? Colors.black.withValues(alpha: 0.1)
+              : Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -301,8 +287,9 @@ class _AnimatedIconBubbleState extends State<_AnimatedIconBubble>
         child: Center(
           child: Icon(
             widget.isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-            color:
-                widget.isSuccess ? Colors.green.shade600 : Colors.red.shade400,
+            color: widget.isSuccess
+                ? Colors.green.shade600
+                : Colors.red.shade400,
             size: 24,
           ),
         ),

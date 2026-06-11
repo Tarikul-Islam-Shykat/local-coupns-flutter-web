@@ -17,7 +17,7 @@ class WebViewScreen extends StatefulWidget {
 class _WebViewScreenState extends State<WebViewScreen> {
   late final WebViewController _controller;
   final RxInt _loadProgress = 0.obs;
-  
+
   // Get arguments
   final String title = Get.arguments?['title'] ?? 'Browser';
   final String url = Get.arguments?['url'] ?? 'https://google.com';
