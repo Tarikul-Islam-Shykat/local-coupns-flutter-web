@@ -33,9 +33,12 @@ class LoginResponseModel {
 
   factory LoginResponseModel.fromJson(dynamic json) {
     final raw = json is Map<String, dynamic> ? json : <String, dynamic>{};
+    final payload = _payloadMap(raw);
     final nested = _nestedMap(raw);
-
     final userMap = _firstMap([
+      payload['user'],
+      payload['data'],
+      payload['result'],
       raw['user'],
       raw['data'],
       raw['result'],
@@ -43,33 +46,54 @@ class LoginResponseModel {
       nested['data'],
       nested['result'],
     ]);
+    final responseData = _firstMap([
+      raw['data'],
+      nested['data'],
+      payload['data'],
+      userMap,
+    ]);
 
     return LoginResponseModel(
       success:
           _readBool(raw, ['success', 'status', 'ok']) ??
+          _readBool(payload, ['success', 'status', 'ok']) ??
           _readBool(nested, ['success', 'status', 'ok']) ??
-          (_readString(raw, ['token', 'accessToken', 'access_token']) != null),
+          _readBool(responseData, ['success', 'status', 'ok']) ??
+          (_readString(responseData, [
+                'token',
+                'accessToken',
+                'access_token',
+              ]) !=
+              null),
       message:
           _readString(raw, ['message', 'msg']) ??
+          _readString(payload, ['message', 'msg']) ??
           _readString(nested, ['message', 'msg']) ??
+          _readString(responseData, ['message', 'msg']) ??
           _readString(userMap, ['message', 'msg']),
       token:
           _readString(raw, ['token', 'accessToken', 'access_token']) ??
+          _readString(payload, ['token', 'accessToken', 'access_token']) ??
           _readString(nested, ['token', 'accessToken', 'access_token']) ??
+          _readString(responseData, ['token', 'accessToken', 'access_token']) ??
           _readString(userMap, ['token', 'accessToken', 'access_token']),
       userId:
           _readString(userMap, ['id', '_id', 'userId']) ??
+          _readString(responseData, ['id', '_id', 'userId']) ??
           _readString(raw, ['id', '_id', 'userId']) ??
           _readString(nested, ['id', '_id', 'userId']),
       name:
           _readString(userMap, ['fullName', 'name', 'userName']) ??
+          _readString(responseData, ['fullName', 'name', 'userName']) ??
           _readString(raw, ['fullName', 'name', 'userName']),
       email:
           _readString(userMap, ['email']) ??
+          _readString(responseData, ['email']) ??
           _readString(raw, ['email']) ??
           _readString(nested, ['email']),
       role:
           _readString(userMap, ['role']) ??
+          _readString(responseData, ['role']) ??
           _readString(raw, ['role']) ??
           _readString(nested, ['role']),
       raw: raw,
@@ -77,6 +101,12 @@ class LoginResponseModel {
   }
 
   bool get hasToken => token != null && token!.isNotEmpty;
+}
+
+Map<String, dynamic> _payloadMap(Map<String, dynamic> source) {
+  final data = source['data'];
+  if (data is Map<String, dynamic>) return data;
+  return source;
 }
 
 Map<String, dynamic> _nestedMap(Map<String, dynamic> source) {

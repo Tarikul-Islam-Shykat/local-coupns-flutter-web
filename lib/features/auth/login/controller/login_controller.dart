@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,19 +59,39 @@ class LoginController extends GetxController {
         password: passwordController.text,
       );
 
+      debugPrint('Login request payload: ${request.toJson()}');
+      log('Login request payload: ${request.toJson()}');
+
       final response = await ApiService.instance.post(
         Urls.login,
         request.toJson(),
       );
 
       if (response == null) {
+        debugPrint('Login response is null');
+        log('Login response is null');
         showSnackBar(false, 'Login failed. Please try again.');
         return;
       }
 
+      debugPrint('Login raw response: $response');
+      log('Login raw response: $response');
+
       final loginResponse = LoginResponseModel.fromJson(response);
+      debugPrint('Login parsed success: ${loginResponse.success}');
+      debugPrint('Login parsed message: ${loginResponse.message}');
+      debugPrint('Login parsed token: ${loginResponse.token}');
+      debugPrint('Login parsed userId: ${loginResponse.userId}');
+      debugPrint('Login parsed role: ${loginResponse.role}');
+      log('Login parsed success: ${loginResponse.success}');
+      log('Login parsed message: ${loginResponse.message}');
+      log('Login parsed token: ${loginResponse.token}');
+      log('Login parsed userId: ${loginResponse.userId}');
+      log('Login parsed role: ${loginResponse.role}');
 
       if (!loginResponse.success && !loginResponse.hasToken) {
+        debugPrint('Login rejected because success/token were missing.');
+        log('Login rejected because success/token were missing.');
         showSnackBar(
           false,
           loginResponse.message ?? 'Invalid login credentials.',
@@ -93,7 +115,9 @@ class LoginController extends GetxController {
       await _localService.setValue(PreferenceKey.rememberMe, true);
 
       showSnackBar(true, loginResponse.message ?? 'Login successful.');
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Login error: $error');
+      log('Login error: $error', stackTrace: stackTrace);
       showSnackBar(
         false,
         'Unable to log in right now. Please check your connection and try again.',

@@ -1,5 +1,3 @@
-
-
 import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -16,35 +14,44 @@ class ApiService {
     String path, {
     bool auth = false,
     Map<String, dynamic>? queryParameters,
-  }) =>
-      _request(() => _dio.get(
-            path,
-            queryParameters: queryParameters,
-            options: Options(extra: {"auth": auth}),
-          ));
+  }) => _request(
+    () => _dio.get(
+      path,
+      queryParameters: queryParameters,
+      options: Options(extra: {"auth": auth}),
+    ),
+  );
 
   Future<dynamic> post(String path, dynamic body, {bool auth = false}) =>
-      _request(() => _dio.post(path,
-            data: body,
-            options: Options(extra: {"auth": auth}),
-          ));
+      _request(
+        () => _dio.post(
+          path,
+          data: body,
+          options: Options(extra: {"auth": auth}),
+        ),
+      );
 
   Future<dynamic> put(String path, dynamic body, {bool auth = false}) =>
-      _request(() => _dio.put(path,
-            data: body,
-            options: Options(extra: {"auth": auth}),
-          ));
+      _request(
+        () => _dio.put(
+          path,
+          data: body,
+          options: Options(extra: {"auth": auth}),
+        ),
+      );
 
   Future<dynamic> patch(String path, dynamic body, {bool auth = false}) =>
-      _request(() => _dio.patch(path,
-            data: body,
-            options: Options(extra: {"auth": auth}),
-          ));
+      _request(
+        () => _dio.patch(
+          path,
+          data: body,
+          options: Options(extra: {"auth": auth}),
+        ),
+      );
 
-  Future<dynamic> delete(String path, {bool auth = false}) =>
-      _request(() => _dio.delete(path,
-            options: Options(extra: {"auth": auth}),
-          ));
+  Future<dynamic> delete(String path, {bool auth = false}) => _request(
+    () => _dio.delete(path, options: Options(extra: {"auth": auth})),
+  );
 
   Future<dynamic> upload(
     String path, {
@@ -58,17 +65,21 @@ class ApiService {
       ...fields,
       if (files.isNotEmpty)
         fileField: await Future.wait(
-          files.map((f) => MultipartFile.fromFile(
-                f.path,
-                filename: f.path.split('/').last,
-              )),
+          files.map(
+            (f) => MultipartFile.fromFile(
+              f.path,
+              filename: f.path.split('/').last,
+            ),
+          ),
         ),
     });
-    return _request(() => _dio.request(
-          path,
-          data: formData,
-          options: Options(method: method, extra: {"auth": auth}),
-        ));
+    return _request(
+      () => _dio.request(
+        path,
+        data: formData,
+        options: Options(method: method, extra: {"auth": auth}),
+      ),
+    );
   }
 
   Future<dynamic> uploadWithMap(
@@ -87,21 +98,18 @@ class ApiService {
     }
 
     // ✅ Boolean fix: convert bool → "true"/"false" string
-   final Map<String, dynamic> sanitizedFields = {};
-fields.forEach((key, value) {
-  if (value == true || value == false) {
-    sanitizedFields[key] = value.toString(); // "true" or "false"
-  } else {
-    sanitizedFields[key] = value;
-  }
-});
+    final Map<String, dynamic> sanitizedFields = {};
+    fields.forEach((key, value) {
+      if (value == true || value == false) {
+        sanitizedFields[key] = value.toString(); // "true" or "false"
+      } else {
+        sanitizedFields[key] = value;
+      }
+    });
 
     log('Sanitized fields: $sanitizedFields');
 
-final formData = FormData.fromMap({
-  ...sanitizedFields,
-  ...multipartFiles,
-});
+    final formData = FormData.fromMap({...sanitizedFields, ...multipartFiles});
 
     return _request(
       () => _dio.request(
@@ -118,6 +126,10 @@ final formData = FormData.fromMap({
       final response = await call();
       return response.data;
     } on DioException catch (e) {
+      log('API ERROR: ${e.requestOptions.method} ${e.requestOptions.uri}');
+      log('API ERROR MESSAGE: ${e.message ?? "unknown"}');
+      log('API ERROR STATUS: ${e.response?.statusCode}');
+      log('API ERROR DATA: ${e.response?.data}');
       NetworkErrorHandler.show(e);
       return null;
     }
