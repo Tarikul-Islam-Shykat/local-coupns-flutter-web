@@ -1,20 +1,21 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../global/custom_snackbar.dart';
 import '../../../../global/issue_log_service.dart';
 import '../../../../service/network/endpoints/endpoints.dart';
-import '../../../../service/network/service/api_service.dart';
+import '../../../../service/network/instance/network_client.dart';
 import '../model/admin_dashboard_model.dart';
 
 class AdminDashboardController extends GetxController {
   final isLoading = false.obs;
   final overview = Rxn<AdminDashboardModel>();
+  final dashboardErrorMessage = RxnString();
+  final dashboardStatusCode = RxnInt();
   final selectedTab = 0.obs;
-
-  final api = ApiService.instance;
 
   @override
   void onInit() {
@@ -25,21 +26,26 @@ class AdminDashboardController extends GetxController {
   Future<void> fetchDashboard() async {
     try {
       isLoading.value = true;
+      overview.value = null;
+      dashboardErrorMessage.value = null;
+      dashboardStatusCode.value = null;
       await IssueLogService.instance.add(
         'Dashboard request started',
         details: 'GET ${Urls.adminDashboardOverview}',
       );
 
-      final response = await api.get(
+      final response = await NetworkClient.instance.dio.get(
         Urls.adminDashboardOverview,
-        auth: true,
-        sendBearerToken: false,
+        options: Options(extra: {'auth': true, 'sendBearerToken': false}),
       );
+      final statusCode = response.statusCode;
+      final body = response.data;
 
-      debugPrint('Dashboard raw response: $response');
-      log('Dashboard raw response: $response');
+      debugPrint('Dashboard raw response: $body');
+      log('Dashboard raw response: $body');
 
-      if (response == null) {
+      if (body == null) {
+        dashboardErrorMessage.value = 'Dashboard data could not be loaded.';
         await IssueLogService.instance.add(
           'Dashboard request failed',
           level: 'error',
@@ -49,27 +55,44 @@ class AdminDashboardController extends GetxController {
         return;
       }
 
-      if (response is Map<String, dynamic> && response['success'] == true) {
-        overview.value = AdminDashboardModel.fromJson(response);
+      if (_isUnauthorized(statusCode, body)) {
+        dashboardStatusCode.value = statusCode ?? 401;
+        dashboardErrorMessage.value =
+            _extractMessage(body) ??
+            'You are not authorized to view the dashboard.';
+        await IssueLogService.instance.add(
+          'Dashboard authorization failed',
+          level: 'error',
+          details:
+              'Status: ${statusCode ?? 401}\n'
+              'Message: ${dashboardErrorMessage.value}',
+        );
+        showSnackBar(false, dashboardErrorMessage.value!);
+        return;
+      }
+
+      if (body is Map<String, dynamic> && body['success'] == true) {
+        overview.value = AdminDashboardModel.fromJson(body);
+        dashboardErrorMessage.value = null;
+        dashboardStatusCode.value = null;
         log('Dashboard loaded successfully');
         await IssueLogService.instance.add(
           'Dashboard loaded successfully',
           details: 'Cards and charts data was received.',
         );
       } else {
+        dashboardStatusCode.value = statusCode;
+        dashboardErrorMessage.value =
+            _extractMessage(body) ?? 'Dashboard data could not be loaded.';
         await IssueLogService.instance.add(
           'Dashboard returned an unexpected response',
           level: 'warning',
-          details: response.toString(),
+          details: body.toString(),
         );
-        showSnackBar(
-          false,
-          (response is Map<String, dynamic> ? response['message'] : null)
-                  ?.toString() ??
-              'Dashboard data could not be loaded.',
-        );
+        showSnackBar(false, dashboardErrorMessage.value!);
       }
     } catch (error, stackTrace) {
+      dashboardErrorMessage.value = 'Failed to load dashboard.';
       log('Dashboard error: $error', stackTrace: stackTrace);
       await IssueLogService.instance.add(
         'Dashboard fetch threw an exception',
@@ -84,5 +107,46 @@ class AdminDashboardController extends GetxController {
 
   void selectTab(int index) {
     selectedTab.value = index;
+  }
+
+  bool get isUnauthorized =>
+      dashboardStatusCode.value == 401 || dashboardStatusCode.value == 403;
+
+  bool _isUnauthorized(int? statusCode, dynamic body) {
+    if (statusCode == 401 || statusCode == 403) {
+      return true;
+    }
+
+    final message = _extractMessage(body)?.toLowerCase();
+    if (message == null) {
+      return false;
+    }
+
+    return message.contains('not authorized') ||
+        message.contains('unauthorized') ||
+        message.contains('401');
+  }
+
+  String? _extractMessage(dynamic body) {
+    if (body is Map<String, dynamic>) {
+      final directMessage = body['message']?.toString().trim();
+      if (directMessage != null && directMessage.isNotEmpty) {
+        return directMessage;
+      }
+
+      final data = body['data'];
+      if (data is Map<String, dynamic>) {
+        final nestedMessage = data['message']?.toString().trim();
+        if (nestedMessage != null && nestedMessage.isNotEmpty) {
+          return nestedMessage;
+        }
+      }
+    }
+
+    final text = body?.toString().trim();
+    if (text == null || text.isEmpty || text == 'null') {
+      return null;
+    }
+    return text;
   }
 }

@@ -195,3 +195,6 @@ Admin navigation note:
 
 - The all-user list lives in the sidebar tab labeled `Users`.
 - That tab opens the same user-management screen, which can filter by consumer or merchant role.
+
+
+

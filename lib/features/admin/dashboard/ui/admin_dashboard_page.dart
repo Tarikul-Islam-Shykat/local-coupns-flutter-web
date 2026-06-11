@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../global/issue_log_panel.dart';
 import '../../../../global/loading.dart';
@@ -57,11 +59,22 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                         ),
                         Expanded(
                           child: controller.selectedTab.value == 0
-                              ? controller.isLoading.value || dashboard == null
+                              ? controller.isLoading.value
                                     ? loading(value: 38)
-                                    : _DashboardContent(
+                                    : dashboard != null
+                                    ? _DashboardContent(
                                         dashboard: dashboard,
                                         info: info,
+                                      )
+                                    : _DashboardStatusView(
+                                        message:
+                                            controller
+                                                .dashboardErrorMessage
+                                                .value ??
+                                            'Dashboard data could not be loaded.',
+                                        isUnauthorized:
+                                            controller.isUnauthorized,
+                                        onRetry: controller.fetchDashboard,
                                       )
                               : isUsers
                               ? const ConsumersManagementView()
@@ -539,23 +552,7 @@ class _SidebarFooter extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Build v1.0.0',
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: const Color(0xFFFF4000),
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Pushed: 11 Jun 2026, 03:00 PM',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.labelSmall?.copyWith(color: Colors.white70),
-                      ),
-                    ],
+                    children: [const _BuildStatusBlock()],
                   ),
                 ),
               ],
@@ -563,6 +560,157 @@ class _SidebarFooter extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DashboardStatusView extends StatelessWidget {
+  const _DashboardStatusView({
+    required this.message,
+    required this.isUnauthorized,
+    required this.onRetry,
+  });
+
+  final String message;
+  final bool isUnauthorized;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = isUnauthorized
+        ? 'You are not authorized'
+        : 'Dashboard unavailable';
+    final accent = isUnauthorized
+        ? const Color(0xFFDC2626)
+        : const Color(0xFFFF4000);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFE7EDF3)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x06000000),
+                  blurRadius: 18,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isUnauthorized
+                        ? Icons.lock_outline_rounded
+                        : Icons.error_outline_rounded,
+                    color: accent,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SelectableText(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: const Color(0xFF475569),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Try again'),
+                    ),
+                    if (isUnauthorized)
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            Get.find<AdminDashboardController>().selectTab(2),
+                        icon: const Icon(Icons.bug_report_outlined),
+                        label: const Text('Open support log'),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BuildStatusBlock extends StatefulWidget {
+  const _BuildStatusBlock();
+
+  @override
+  State<_BuildStatusBlock> createState() => _BuildStatusBlockState();
+}
+
+class _BuildStatusBlockState extends State<_BuildStatusBlock> {
+  late final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
+  late final DateTime _loadedAt = DateTime.now();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: _packageInfo,
+      builder: (context, snapshot) {
+        final packageInfo = snapshot.data;
+        final versionLabel = packageInfo == null
+            ? 'Build loading...'
+            : 'Build v${packageInfo.version}+${packageInfo.buildNumber}';
+        final loadedLabel =
+            'Loaded: ${DateFormat('dd MMM yyyy, hh:mm a').format(_loadedAt)}';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              versionLabel,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: const Color(0xFFFF4000),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              loadedLabel,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: Colors.white70),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'issue_log_service.dart';
@@ -146,6 +147,23 @@ class _LogTile extends StatelessWidget {
                   ),
                 ),
               ),
+              IconButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: _copyText));
+                  Get.snackbar(
+                    'Copied',
+                    'Issue details copied to clipboard.',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+                tooltip: 'Copy issue',
+                icon: const Icon(
+                  Icons.copy_rounded,
+                  size: 18,
+                  color: Colors.white70,
+                ),
+              ),
               Text(
                 _timeLabel(entry.timestamp),
                 style: Theme.of(
@@ -156,7 +174,7 @@ class _LogTile extends StatelessWidget {
           ),
           if (entry.details != null && entry.details!.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(
+            SelectableText(
               entry.details!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.white70,
@@ -199,6 +217,29 @@ class _LogTile extends StatelessWidget {
     final minute = timestamp.minute.toString().padLeft(2, '0');
     final second = timestamp.second.toString().padLeft(2, '0');
     return '$hour:$minute:$second';
+  }
+
+  String get _copyText {
+    final buffer = StringBuffer()
+      ..writeln('Title: ${entry.title}')
+      ..writeln('Level: ${entry.level}')
+      ..writeln('Time: ${entry.timestamp.toIso8601String()}');
+
+    if (entry.details != null && entry.details!.trim().isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln('Details:')
+        ..writeln(entry.details!.trim());
+    }
+
+    if (entry.imageUrl != null && entry.imageUrl!.trim().isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln('Image URL:')
+        ..writeln(entry.imageUrl!.trim());
+    }
+
+    return buffer.toString().trim();
   }
 }
 
