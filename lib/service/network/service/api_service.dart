@@ -13,44 +13,74 @@ class ApiService {
   Future<dynamic> get(
     String path, {
     bool auth = false,
+    bool sendBearerToken = true,
     Map<String, dynamic>? queryParameters,
   }) => _request(
     () => _dio.get(
       path,
       queryParameters: queryParameters,
-      options: Options(extra: {"auth": auth}),
+      options: Options(
+        extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+      ),
     ),
   );
 
-  Future<dynamic> post(String path, dynamic body, {bool auth = false}) =>
-      _request(
-        () => _dio.post(
-          path,
-          data: body,
-          options: Options(extra: {"auth": auth}),
-        ),
-      );
+  Future<dynamic> post(
+    String path,
+    dynamic body, {
+    bool auth = false,
+    bool sendBearerToken = true,
+  }) => _request(
+    () => _dio.post(
+      path,
+      data: body,
+      options: Options(
+        extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+      ),
+    ),
+  );
 
-  Future<dynamic> put(String path, dynamic body, {bool auth = false}) =>
-      _request(
-        () => _dio.put(
-          path,
-          data: body,
-          options: Options(extra: {"auth": auth}),
-        ),
-      );
+  Future<dynamic> put(
+    String path,
+    dynamic body, {
+    bool auth = false,
+    bool sendBearerToken = true,
+  }) => _request(
+    () => _dio.put(
+      path,
+      data: body,
+      options: Options(
+        extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+      ),
+    ),
+  );
 
-  Future<dynamic> patch(String path, dynamic body, {bool auth = false}) =>
-      _request(
-        () => _dio.patch(
-          path,
-          data: body,
-          options: Options(extra: {"auth": auth}),
-        ),
-      );
+  Future<dynamic> patch(
+    String path,
+    dynamic body, {
+    bool auth = false,
+    bool sendBearerToken = true,
+  }) => _request(
+    () => _dio.patch(
+      path,
+      data: body,
+      options: Options(
+        extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+      ),
+    ),
+  );
 
-  Future<dynamic> delete(String path, {bool auth = false}) => _request(
-    () => _dio.delete(path, options: Options(extra: {"auth": auth})),
+  Future<dynamic> delete(
+    String path, {
+    bool auth = false,
+    bool sendBearerToken = true,
+  }) => _request(
+    () => _dio.delete(
+      path,
+      options: Options(
+        extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+      ),
+    ),
   );
 
   Future<dynamic> upload(
@@ -60,6 +90,7 @@ class ApiService {
     String fileField = 'image',
     String method = 'POST',
     bool auth = false,
+    bool sendBearerToken = true,
   }) async {
     final formData = FormData.fromMap({
       ...fields,
@@ -77,7 +108,10 @@ class ApiService {
       () => _dio.request(
         path,
         data: formData,
-        options: Options(method: method, extra: {"auth": auth}),
+        options: Options(
+          method: method,
+          extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+        ),
       ),
     );
   }
@@ -88,6 +122,7 @@ class ApiService {
     Map<String, File> fileMap = const {},
     String method = 'POST',
     bool auth = false,
+    bool sendBearerToken = true,
   }) async {
     final Map<String, MultipartFile> multipartFiles = {};
     for (final entry in fileMap.entries) {
@@ -115,7 +150,10 @@ class ApiService {
       () => _dio.request(
         path,
         data: formData,
-        options: Options(method: method, extra: {"auth": auth}),
+        options: Options(
+          method: method,
+          extra: {"auth": auth, "sendBearerToken": sendBearerToken},
+        ),
       ),
     );
   }

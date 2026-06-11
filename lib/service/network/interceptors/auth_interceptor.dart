@@ -13,8 +13,9 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final needsAuth = options.extra['auth'] == true;
+    final sendBearerToken = options.extra['sendBearerToken'] != false;
 
-    if (needsAuth) {
+    if (needsAuth && sendBearerToken) {
       final localToken = await _localService.getValue<String>(
         PreferenceKey.token,
       );
@@ -27,6 +28,8 @@ class AuthInterceptor extends Interceptor {
             ? token
             : 'Bearer $token';
       }
+    } else if (needsAuth) {
+      log('AuthInterceptor: using cookie-based auth for ${options.uri}');
     }
 
     handler.next(options);

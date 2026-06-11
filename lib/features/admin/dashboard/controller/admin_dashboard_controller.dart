@@ -24,7 +24,11 @@ class AdminDashboardController extends GetxController {
   Future<void> fetchDashboard() async {
     try {
       isLoading.value = true;
-      final response = await api.get(Urls.adminDashboardOverview, auth: true);
+      final response = await api.get(
+        Urls.adminDashboardOverview,
+        auth: true,
+        sendBearerToken: false,
+      );
 
       debugPrint('Dashboard raw response: $response');
       log('Dashboard raw response: $response');

@@ -27,10 +27,10 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
             return Obx(() {
               final dashboard = controller.overview.value;
               final isDashboard = controller.selectedTab.value == 0;
-              final title = isDashboard ? 'Dashboard' : 'Consumers Management';
+              final title = isDashboard ? 'Dashboard' : 'Users Management';
               final subtitle = isDashboard
                   ? 'Overview and analytics'
-                  : 'Manage consumer list';
+                  : 'Manage all users';
 
               return Row(
                 children: [
@@ -194,7 +194,7 @@ class _Sidebar extends StatelessWidget {
                 ),
                 _SidebarItem(
                   icon: Icons.people_outline_rounded,
-                  label: 'Consumers',
+                  label: 'Users',
                   selected: selectedTab == 1,
                   onTap: () => onSelectTab(1),
                 ),

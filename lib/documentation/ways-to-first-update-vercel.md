@@ -125,3 +125,30 @@ How to recognize it:
 Short note to send to backend dev:
 
 > Flutter web is hitting a CORS block. Postman works, but Chrome gets `null` because the response does not include `Access-Control-Allow-Origin` for the Flutter origin. Please whitelist the local Flutter origin and the Vercel frontend domain, and make sure preflight `OPTIONS` is handled.
+
+## 13. Dashboard loads but users load differently
+
+If the users list works but the dashboard overview still says it cannot be loaded, check the auth style the backend expects.
+
+What happened in this project:
+
+- Login returns a JSON token and also sets an `HttpOnly` cookie.
+- The `/users` endpoint works with a bearer token in the `Authorization` header.
+- The `/admindashboards` endpoint rejected the bearer token and needed the browser cookie instead.
+
+What to fix:
+
+- Make sure Flutter web sends browser credentials for cookie-based auth.
+- Do not force a bearer token on endpoints that should use the cookie.
+- Keep bearer auth for endpoints like `/users` if they already work that way.
+
+How to recognize it:
+
+- `/users` works in Flutter web.
+- `/admindashboards` returns `null` or an unexpected auth error.
+- Postman may work differently because it can send headers manually, while the browser also has cookie rules.
+
+Admin navigation note:
+
+- The all-user list lives in the sidebar tab labeled `Users`.
+- That tab opens the same user-management screen, which can filter by consumer or merchant role.

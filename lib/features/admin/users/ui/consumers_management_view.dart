@@ -49,7 +49,7 @@ class ConsumersManagementView extends GetView<AdminUsersController> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'All ${controller.displaySectionLabel} (${meta?.total ?? users.length})',
+                          'All Users (${meta?.total ?? users.length})',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 18),
@@ -81,14 +81,14 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Consumers Management',
+                'Users Management',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                'Manage consumer list',
+                'Manage all users from one place',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
