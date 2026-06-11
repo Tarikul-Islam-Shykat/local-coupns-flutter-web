@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../global/issue_log_panel.dart';
 import '../../../../global/loading.dart';
 import '../../../../global/responsive.dart';
 import '../../dashboard/controller/admin_dashboard_controller.dart';
@@ -24,45 +25,51 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
           builder: (context, info) {
             final showSidebar = info.isDesktop;
 
-            return Obx(() {
-              final dashboard = controller.overview.value;
-              final isDashboard = controller.selectedTab.value == 0;
-              final title = isDashboard ? 'Dashboard' : 'Users Management';
-              final subtitle = isDashboard
-                  ? 'Overview and analytics'
-                  : 'Manage all users';
+            return Stack(
+              children: [
+                Obx(() {
+                  final dashboard = controller.overview.value;
+                  final isDashboard = controller.selectedTab.value == 0;
+                  final title = isDashboard ? 'Dashboard' : 'Users Management';
+                  final subtitle = isDashboard
+                      ? 'Overview and analytics'
+                      : 'Manage all users';
 
-              return Row(
-                children: [
-                  if (showSidebar)
-                    _Sidebar(
-                      selectedTab: controller.selectedTab.value,
-                      onSelectTab: controller.selectTab,
-                    ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _TopBar(
-                          showMenu: !showSidebar,
-                          title: title,
-                          subtitle: subtitle,
+                  return Row(
+                    children: [
+                      if (showSidebar)
+                        _Sidebar(
+                          selectedTab: controller.selectedTab.value,
+                          onSelectTab: controller.selectTab,
                         ),
-                        Expanded(
-                          child: controller.selectedTab.value == 0
-                              ? controller.isLoading.value || dashboard == null
-                                    ? loading(value: 38)
-                                    : _DashboardContent(
-                                        dashboard: dashboard,
-                                        info: info,
-                                      )
-                              : const ConsumersManagementView(),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            _TopBar(
+                              showMenu: !showSidebar,
+                              title: title,
+                              subtitle: subtitle,
+                            ),
+                            Expanded(
+                              child: controller.selectedTab.value == 0
+                                  ? controller.isLoading.value ||
+                                            dashboard == null
+                                        ? loading(value: 38)
+                                        : _DashboardContent(
+                                            dashboard: dashboard,
+                                            info: info,
+                                          )
+                                  : const ConsumersManagementView(),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            });
+                      ),
+                    ],
+                  );
+                }),
+                const IssueLogPanel(),
+              ],
+            );
           },
         ),
       ),

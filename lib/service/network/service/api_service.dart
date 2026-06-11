@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import '../../../global/issue_log_service.dart';
 import '../error/network_error_handler.dart';
 import '../instance/network_client.dart';
 
@@ -168,6 +169,15 @@ class ApiService {
       log('API ERROR MESSAGE: ${e.message ?? "unknown"}');
       log('API ERROR STATUS: ${e.response?.statusCode}');
       log('API ERROR DATA: ${e.response?.data}');
+      await IssueLogService.instance.add(
+        'API request failed',
+        level: 'error',
+        details:
+            '${e.requestOptions.method} ${e.requestOptions.uri}\n'
+            'Message: ${e.message ?? "unknown"}\n'
+            'Status: ${e.response?.statusCode}\n'
+            'Data: ${e.response?.data}',
+      );
       NetworkErrorHandler.show(e);
       return null;
     }

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../global/issue_log_service.dart';
 import '../../../../service/network/endpoints/endpoints.dart';
 import '../../../../service/network/service/api_service.dart';
 import '../model/admin_user_model.dart';
@@ -45,6 +46,10 @@ class AdminUsersController extends GetxController {
 
       debugPrint('Users query: $query');
       log('Users query: $query');
+      await IssueLogService.instance.add(
+        'Users request started',
+        details: 'GET ${Urls.users}\n$query',
+      );
 
       final response = await api.get(
         Urls.users,
@@ -60,11 +65,25 @@ class AdminUsersController extends GetxController {
         users.assignAll(parsed.users);
         meta.value = parsed.meta;
         log('Loaded users: ${users.length}');
+        await IssueLogService.instance.add(
+          'Users loaded successfully',
+          details: 'Loaded ${users.length} user(s).',
+        );
       } else {
         users.clear();
+        await IssueLogService.instance.add(
+          'Users request returned an unexpected response',
+          level: 'warning',
+          details: response.toString(),
+        );
       }
     } catch (error, stackTrace) {
       log('Users load error: $error', stackTrace: stackTrace);
+      await IssueLogService.instance.add(
+        'Users fetch threw an exception',
+        level: 'error',
+        details: '$error\n$stackTrace',
+      );
     } finally {
       isLoading.value = false;
     }

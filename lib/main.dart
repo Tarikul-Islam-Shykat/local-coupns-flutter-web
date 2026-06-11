@@ -7,10 +7,12 @@ import 'features/admin/dashboard/ui/admin_dashboard_page.dart';
 import 'features/admin/users/controller/admin_users_controller.dart';
 import 'features/auth/login/controller/login_controller.dart';
 import 'features/auth/login/ui/login_page.dart';
+import 'global/issue_log_service.dart';
 import 'routes/app_routes.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await IssueLogService.instance.init();
   runApp(const LocalCouponsApp());
 }
 
