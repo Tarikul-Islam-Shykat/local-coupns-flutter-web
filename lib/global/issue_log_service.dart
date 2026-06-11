@@ -10,18 +10,21 @@ class IssueLogEntry {
     required this.level,
     required this.timestamp,
     this.details,
+    this.imageUrl,
   });
 
   final String title;
   final String level;
   final DateTime timestamp;
   final String? details;
+  final String? imageUrl;
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'level': level,
     'timestamp': timestamp.toIso8601String(),
     'details': details,
+    'imageUrl': imageUrl,
   };
 
   factory IssueLogEntry.fromJson(Map<String, dynamic> json) {
@@ -32,6 +35,7 @@ class IssueLogEntry {
           DateTime.tryParse((json['timestamp'] ?? '').toString()) ??
           DateTime.now(),
       details: json['details']?.toString(),
+      imageUrl: json['imageUrl']?.toString(),
     );
   }
 }
@@ -78,12 +82,14 @@ class IssueLogService {
     String title, {
     String level = 'info',
     String? details,
+    String? imageUrl,
   }) async {
     final entry = IssueLogEntry(
       title: title,
       level: level,
       timestamp: DateTime.now(),
       details: details,
+      imageUrl: imageUrl,
     );
 
     logs.insert(0, entry);

@@ -3,113 +3,53 @@ import 'package:get/get.dart';
 
 import 'issue_log_service.dart';
 
-class IssueLogPanel extends StatefulWidget {
-  const IssueLogPanel({super.key});
+class IssueLogPanel extends StatelessWidget {
+  const IssueLogPanel({super.key, this.compact = false});
 
-  @override
-  State<IssueLogPanel> createState() => _IssueLogPanelState();
-}
-
-class _IssueLogPanelState extends State<IssueLogPanel> {
-  bool _expanded = false;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final isCompact = width < 720;
-
     return Obx(() {
       final logs = IssueLogService.instance.logs;
 
-      return Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Material(
-            color: Colors.transparent,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              width: _expanded ? (isCompact ? width - 32 : 380) : 172,
-              constraints: BoxConstraints(
-                maxHeight: _expanded ? (isCompact ? 260 : 340) : 56,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF1E293B)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    blurRadius: 24,
-                    offset: Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                child: _expanded
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _PanelHeader(
-                            count: logs.length,
-                            onToggle: () => setState(() => _expanded = false),
-                            onClear: () => IssueLogService.instance.clear(),
-                          ),
-                          const Divider(height: 1, color: Color(0xFF1E293B)),
-                          Flexible(
-                            child: logs.isEmpty
-                                ? const _EmptyLogState()
-                                : ListView.separated(
-                                    shrinkWrap: true,
-                                    padding: const EdgeInsets.all(12),
-                                    itemCount: logs.length,
-                                    separatorBuilder: (context, _) =>
-                                        const SizedBox(height: 8),
-                                    itemBuilder: (context, index) {
-                                      final entry = logs[index];
-                                      return _LogTile(entry: entry);
-                                    },
-                                  ),
-                          ),
-                        ],
-                      )
-                    : InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () => setState(() => _expanded = true),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 14,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.bug_report_outlined,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Debug Log',
-                                style: Theme.of(context).textTheme.labelLarge
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
-                              const Spacer(),
-                              _LogCountPill(count: logs.length),
-                            ],
-                          ),
-                        ),
-                      ),
-              ),
-            ),
+      return Container(
+        width: compact ? double.infinity : 360,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A),
+          borderRadius: BorderRadius.circular(compact ? 18 : 0),
+          border: Border(
+            left: compact
+                ? BorderSide.none
+                : const BorderSide(color: Color(0xFF1E293B)),
+            top: compact
+                ? const BorderSide(color: Color(0xFF1E293B))
+                : BorderSide.none,
           ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _PanelHeader(
+              count: logs.length,
+              onClear: () => IssueLogService.instance.clear(),
+            ),
+            const Divider(height: 1, color: Color(0xFF1E293B)),
+            Expanded(
+              child: logs.isEmpty
+                  ? const _EmptyLogState()
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: logs.length,
+                      separatorBuilder: (context, _) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final entry = logs[index];
+                        return _LogTile(entry: entry);
+                      },
+                    ),
+            ),
+          ],
         ),
       );
     });
@@ -117,65 +57,50 @@ class _IssueLogPanelState extends State<IssueLogPanel> {
 }
 
 class _PanelHeader extends StatelessWidget {
-  const _PanelHeader({
-    required this.count,
-    required this.onToggle,
-    required this.onClear,
-  });
+  const _PanelHeader({required this.count, required this.onClear});
 
   final int count;
-  final VoidCallback onToggle;
   final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+      decoration: const BoxDecoration(color: Color(0xFF111C31)),
       child: Row(
         children: [
-          const Icon(Icons.bug_report_outlined, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            'Debug Log',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+          Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFF4000),
+              shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 10),
-          _LogCountPill(count: count),
-          const Spacer(),
-          TextButton(onPressed: onClear, child: const Text('Clear')),
-          IconButton(
-            onPressed: onToggle,
-            icon: const Icon(Icons.close_rounded, color: Colors.white70),
-            tooltip: 'Collapse log',
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Debug / Issue Log',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  '$count item(s) stored',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: Colors.white60),
+                ),
+              ],
+            ),
           ),
+          TextButton(onPressed: onClear, child: const Text('Clear')),
         ],
-      ),
-    );
-  }
-}
-
-class _LogCountPill extends StatelessWidget {
-  const _LogCountPill({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        '$count',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
       ),
     );
   }
@@ -239,6 +164,31 @@ class _LogTile extends StatelessWidget {
               ),
             ),
           ],
+          if (entry.imageUrl != null && entry.imageUrl!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.network(
+                  entry.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: const Color(0xFF0B1220),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Image failed to load',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white54),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -257,15 +207,12 @@ class _EmptyLogState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 160,
-      child: Center(
-        child: Text(
-          'No issues logged yet.',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-        ),
+    return Center(
+      child: Text(
+        'No issues logged yet.',
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
       ),
     );
   }

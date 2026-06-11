@@ -30,10 +30,17 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                 Obx(() {
                   final dashboard = controller.overview.value;
                   final isDashboard = controller.selectedTab.value == 0;
-                  final title = isDashboard ? 'Dashboard' : 'Users Management';
+                  final isUsers = controller.selectedTab.value == 1;
+                  final title = isDashboard
+                      ? 'Dashboard'
+                      : isUsers
+                      ? 'Users Management'
+                      : 'Issue Log';
                   final subtitle = isDashboard
                       ? 'Overview and analytics'
-                      : 'Manage all users';
+                      : isUsers
+                      ? 'Manage all users'
+                      : 'Temporary log view for debugging';
 
                   return Row(
                     children: [
@@ -59,7 +66,9 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                                             dashboard: dashboard,
                                             info: info,
                                           )
-                                  : const ConsumersManagementView(),
+                                  : isUsers
+                                  ? const ConsumersManagementView()
+                                  : const _IssueLogView(),
                             ),
                           ],
                         ),
@@ -218,7 +227,8 @@ class _Sidebar extends StatelessWidget {
                 _SidebarItem(
                   icon: Icons.report_gmailerrorred_outlined,
                   label: 'Issues',
-                  onTap: () => _comingSoon(),
+                  selected: selectedTab == 2,
+                  onTap: () => onSelectTab(2),
                 ),
               ],
             ),
@@ -231,6 +241,35 @@ class _Sidebar extends StatelessWidget {
 
   void _comingSoon() {
     Get.snackbar('Coming soon', 'This section is not built yet.');
+  }
+}
+
+class _IssueLogView extends StatelessWidget {
+  const _IssueLogView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Issue Log',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Use this tab to inspect dashboard, users, and API logs. Screenshots or image URLs will show inline when available.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 18),
+          const Expanded(child: IssueLogPanel(compact: true)),
+        ],
+      ),
+    );
   }
 }
 
