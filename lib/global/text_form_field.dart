@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../const/app_colors.dart';
@@ -123,13 +122,13 @@ class _GlobalTextFieldState extends State<GlobalTextField> {
                   Icon(
                     Icons.visibility_off_outlined,
                     color: _resolvedInactiveColor,
-                    size: 20.sp,
+                    size: 20,
                   ))
             : (widget.customVisibilityOnIcon ??
                   Icon(
                     Icons.visibility_outlined,
                     color: _resolvedActiveColor,
-                    size: 20.sp,
+                    size: 20,
                   )),
       );
     }
@@ -154,7 +153,7 @@ class _GlobalTextFieldState extends State<GlobalTextField> {
                 color: widget.readOnly ? Colors.grey : AppColors.blackColor,
               ),
               if (widget.isMandatory) ...[
-                SizedBox(width: 2.w),
+                const SizedBox(width: 2),
                 smallText(
                   text: '*',
                   color: Colors.red,
@@ -163,7 +162,7 @@ class _GlobalTextFieldState extends State<GlobalTextField> {
               ],
             ],
           ),
-          SizedBox(height: 6.h),
+          const SizedBox(height: 6),
         ],
 
         // ── Field ───────────────────────────────────────────────────
@@ -178,12 +177,12 @@ class _GlobalTextFieldState extends State<GlobalTextField> {
           style: GoogleFonts.spaceGrotesk(
             color: widget.readOnly ? Colors.grey : AppColors.blackColor,
             fontWeight: FontWeight.w400,
-            fontSize: 16.sp,
+            fontSize: 16,
           ),
           decoration: InputDecoration(
             errorStyle: GoogleFonts.spaceGrotesk(
               color: Colors.red,
-              fontSize: 12.sp,
+              fontSize: 12,
               fontWeight: FontWeight.w400,
             ),
             hintText: widget.hintText,
@@ -192,36 +191,36 @@ class _GlobalTextFieldState extends State<GlobalTextField> {
             hintStyle: GoogleFonts.spaceGrotesk(
               color: _resolvedInactiveColor,
               fontWeight: FontWeight.w400,
-              fontSize: 16.sp,
+              fontSize: 16,
             ),
             fillColor: _resolvedFillColor,
             filled: true,
-            contentPadding: EdgeInsets.symmetric(
-              vertical: 14.h,
-              horizontal: 14.w,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 14,
             ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: _resolvedInactiveColor, width: 1),
-              borderRadius: BorderRadius.circular(widget.borderRadius.r),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: _resolvedActiveColor, width: 1.5),
-              borderRadius: BorderRadius.circular(widget.borderRadius.r),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
             errorBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Colors.red, width: 1),
-              borderRadius: BorderRadius.circular(widget.borderRadius.r),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Colors.red, width: 1.5),
-              borderRadius: BorderRadius.circular(widget.borderRadius.r),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
             disabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: Colors.grey.withValues(alpha: 0.3),
                 width: 1,
               ),
-              borderRadius: BorderRadius.circular(widget.borderRadius.r),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
           ),
           validator: widget.validator,

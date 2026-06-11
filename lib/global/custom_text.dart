@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 Widget headingText({
@@ -20,7 +19,7 @@ Widget headingText({
         overflow: overflow,
         style: GoogleFonts.spaceGrotesk(
           color: color,
-          fontSize: 26.sp,
+          fontSize: 26,
           fontWeight: fontWeight,
         ),
       ),
@@ -46,7 +45,7 @@ Widget normalText({
         overflow: overflow,
         style: GoogleFonts.spaceGrotesk(
           color: color,
-          fontSize: 16.sp,
+          fontSize: 16,
           fontWeight: fontWeight,
         ),
       ),
@@ -72,7 +71,7 @@ Widget normalTextv2({
         overflow: overflow,
         style: GoogleFonts.spaceGrotesk(
           color: color,
-          fontSize: 14.sp,
+          fontSize: 14,
           fontWeight: fontWeight,
         ),
       ),
@@ -98,7 +97,7 @@ Widget smallText({
         overflow: overflow,
         style: GoogleFonts.spaceGrotesk(
           color: color,
-          fontSize: 12.sp,
+          fontSize: 12,
           fontWeight: fontWeight,
         ),
       ),
@@ -124,7 +123,7 @@ Widget smallerText({
         overflow: overflow,
         style: GoogleFonts.spaceGrotesk(
           color: color,
-          fontSize: 10.sp,
+          fontSize: 10,
           fontWeight: fontWeight,
         ),
       ),

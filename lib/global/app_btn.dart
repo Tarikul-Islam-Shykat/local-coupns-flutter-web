@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../const/app_colors.dart';
 import 'custom_text.dart';
 
@@ -43,22 +42,22 @@ class GlobalAppButton extends StatelessWidget {
       child: Ink(
         decoration: BoxDecoration(
           color: active ? _resolvedBackground : _resolvedDisabledColor,
-          borderRadius: BorderRadius.circular(borderRadius.r),
+          borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(borderRadius.r),
+          borderRadius: BorderRadius.circular(borderRadius),
           splashColor: Colors.white.withOpacity(0.3), // ripple color
           highlightColor: Colors.white.withOpacity(0.1),
           onTap: active ? onTap : null,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: width,
-            height: height ?? 52.h,
+            height: height ?? 52,
             alignment: Alignment.center,
             child: isLoading
                 ? SizedBox(
-                    width: 22.w,
-                    height: 22.w,
+                    width: 22,
+                    height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor: AlwaysStoppedAnimation<Color>(textColor),
@@ -110,7 +109,7 @@ GlobalAppButton(
   text: 'Verify',
   onTap: () {},
   width: 160.w,
-  height: 44.h,
+  height: 44,
 ),
 
 // 6. Toggling enabled based on form state
