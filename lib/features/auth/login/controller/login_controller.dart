@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../global/custom_snackbar.dart';
+import '../../../../global/issue_log_service.dart';
 import '../../../../service/network/endpoints/endpoints.dart';
 import '../../../../service/network/service/api_service.dart';
 import '../../../../service/storage/local_storage/local_storage.dart';
+import '../../../../service/storage/secure/storage.dart';
 import '../../../../routes/app_routes.dart';
 import '../model/login_model.dart';
 
@@ -19,6 +21,7 @@ class LoginController extends GetxController {
   final isRememberMe = true.obs;
 
   final LocalService _localService = LocalService();
+  final SecureStorageService _secureStorage = SecureStorageService();
 
   @override
   void onInit() {
@@ -62,6 +65,12 @@ class LoginController extends GetxController {
 
       debugPrint('Login request payload: ${request.toJson()}');
       log('Login request payload: ${request.toJson()}');
+      await IssueLogService.instance.add(
+        'Login request prepared',
+        details:
+            'POST ${Urls.login}\n'
+            'Request body: ${request.toJson()}',
+      );
 
       final response = await ApiService.instance.post(
         Urls.login,
@@ -77,6 +86,10 @@ class LoginController extends GetxController {
 
       debugPrint('Login raw response: $response');
       log('Login raw response: $response');
+      await IssueLogService.instance.add(
+        'Login response received',
+        details: 'Response body: $response',
+      );
 
       final loginResponse = LoginResponseModel.fromJson(response);
       debugPrint('Login parsed success: ${loginResponse.success}');
@@ -102,6 +115,32 @@ class LoginController extends GetxController {
 
       if (loginResponse.hasToken) {
         await _localService.setValue(PreferenceKey.token, loginResponse.token!);
+        await IssueLogService.instance.add(
+          'Token stored in local storage',
+          details:
+              'Key: ${PreferenceKey.token.key}\n'
+              'Token: ${_maskToken(loginResponse.token)}',
+        );
+
+        try {
+          await _secureStorage.set(
+            SecureStorageService.token,
+            loginResponse.token!,
+          );
+          await IssueLogService.instance.add(
+            'Token stored in secure storage',
+            details:
+                'Key: ${SecureStorageService.token}\n'
+                'Token: ${_maskToken(loginResponse.token)}',
+          );
+        } catch (error, stackTrace) {
+          log('Secure token storage failed: $error', stackTrace: stackTrace);
+          await IssueLogService.instance.add(
+            'Secure token storage failed',
+            level: 'warning',
+            details: '$error',
+          );
+        }
       }
 
       await _localService.setValue(
@@ -134,5 +173,18 @@ class LoginController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String _maskToken(String? token) {
+    if (token == null || token.trim().isEmpty) {
+      return 'Missing';
+    }
+    final normalized = token.startsWith('Bearer ')
+        ? token.substring('Bearer '.length)
+        : token;
+    if (normalized.length <= 10) {
+      return normalized;
+    }
+    return '${normalized.substring(0, 6)}...${normalized.substring(normalized.length - 4)}';
   }
 }

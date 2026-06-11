@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
+
 import '../../../global/issue_log_service.dart';
 import '../error/network_error_handler.dart';
 import '../instance/network_client.dart';
@@ -163,6 +165,10 @@ class ApiService {
   Future<dynamic> _request(Future<Response> Function() call) async {
     try {
       final response = await call();
+      await IssueLogService.instance.add(
+        'API request completed',
+        details: _buildSuccessDetails(response),
+      );
       return response.data;
     } on DioException catch (e) {
       log('API ERROR: ${e.requestOptions.method} ${e.requestOptions.uri}');
@@ -172,14 +178,81 @@ class ApiService {
       await IssueLogService.instance.add(
         'API request failed',
         level: 'error',
-        details:
-            '${e.requestOptions.method} ${e.requestOptions.uri}\n'
-            'Message: ${e.message ?? "unknown"}\n'
-            'Status: ${e.response?.statusCode}\n'
-            'Data: ${e.response?.data}',
+        details: _buildErrorDetails(e),
       );
       NetworkErrorHandler.show(e);
       return null;
     }
+  }
+
+  String _buildSuccessDetails(Response response) {
+    final request = response.requestOptions;
+    return [
+      '${request.method} ${request.uri}',
+      'Status: ${response.statusCode}',
+      'Auth mode: ${_authMode(request)}',
+      'Token: ${_maskedAuthorization(request.headers['Authorization'])}',
+      'Query: ${_stringifyValue(request.queryParameters)}',
+      'Request body: ${_stringifyValue(request.data)}',
+      'Response body: ${_stringifyValue(response.data)}',
+    ].join('\n');
+  }
+
+  String _buildErrorDetails(DioException error) {
+    final request = error.requestOptions;
+    return [
+      '${request.method} ${request.uri}',
+      'Message: ${error.message ?? "unknown"}',
+      'Status: ${error.response?.statusCode}',
+      'Auth mode: ${_authMode(request)}',
+      'Token: ${_maskedAuthorization(request.headers['Authorization'])}',
+      'Query: ${_stringifyValue(request.queryParameters)}',
+      'Request body: ${_stringifyValue(request.data)}',
+      'Response body: ${_stringifyValue(error.response?.data)}',
+    ].join('\n');
+  }
+
+  String _authMode(RequestOptions request) {
+    final needsAuth = request.extra['auth'] == true;
+    if (!needsAuth) {
+      return 'No auth';
+    }
+    return request.extra['sendBearerToken'] == false
+        ? 'Cookie auth'
+        : 'Bearer auth';
+  }
+
+  String _maskedAuthorization(dynamic headerValue) {
+    final value = headerValue?.toString().trim();
+    if (value == null || value.isEmpty) {
+      return 'Not sent';
+    }
+
+    const bearerPrefix = 'Bearer ';
+    final token = value.startsWith(bearerPrefix)
+        ? value.substring(bearerPrefix.length)
+        : value;
+
+    if (token.length <= 10) {
+      return value;
+    }
+
+    final masked =
+        '${token.substring(0, 6)}...${token.substring(token.length - 4)}';
+    return value.startsWith(bearerPrefix) ? '$bearerPrefix$masked' : masked;
+  }
+
+  String _stringifyValue(dynamic value) {
+    if (value == null) {
+      return 'null';
+    }
+    if (value is FormData) {
+      return 'FormData(fields: ${value.fields.length}, files: ${value.files.length})';
+    }
+    final text = value.toString();
+    if (text.isEmpty) {
+      return '(empty)';
+    }
+    return text;
   }
 }

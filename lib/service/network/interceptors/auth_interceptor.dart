@@ -1,5 +1,8 @@
 import 'dart:developer';
+
 import 'package:dio/dio.dart';
+
+import '../../../global/issue_log_service.dart';
 import '../../storage/local_storage/local_storage.dart';
 import '../../storage/secure/storage.dart';
 
@@ -21,6 +24,11 @@ class AuthInterceptor extends Interceptor {
       );
       final secureToken = await _storage.get(SecureStorageService.token);
       final token = localToken ?? secureToken;
+      final tokenSource = localToken != null
+          ? 'Local storage'
+          : secureToken != null
+          ? 'Secure storage'
+          : 'Missing';
       log("AuthInterceptor: token found? ${token != null}");
 
       if (token != null) {
@@ -28,10 +36,41 @@ class AuthInterceptor extends Interceptor {
             ? token
             : 'Bearer $token';
       }
+
+      await IssueLogService.instance.add(
+        'Auth header prepared',
+        details:
+            '${options.method} ${options.uri}\n'
+            'Token source: $tokenSource\n'
+            'Token: ${_maskToken(token)}',
+      );
     } else if (needsAuth) {
       log('AuthInterceptor: using cookie-based auth for ${options.uri}');
+      await IssueLogService.instance.add(
+        'Cookie auth request prepared',
+        details:
+            '${options.method} ${options.uri}\n'
+            'Bearer token: not sent\n'
+            'Reason: sendBearerToken=false',
+      );
     }
 
     handler.next(options);
+  }
+
+  String _maskToken(String? token) {
+    if (token == null || token.trim().isEmpty) {
+      return 'Missing';
+    }
+
+    final normalized = token.startsWith('Bearer ')
+        ? token.substring('Bearer '.length)
+        : token;
+
+    if (normalized.length <= 10) {
+      return normalized;
+    }
+
+    return '${normalized.substring(0, 6)}...${normalized.substring(normalized.length - 4)}';
   }
 }
