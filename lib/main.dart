@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import 'features/admin/dashboard/controller/admin_dashboard_controller.dart';
 import 'features/admin/dashboard/ui/admin_dashboard_page.dart';
+import 'features/admin/users/controller/admin_users_controller.dart';
 import 'features/auth/login/controller/login_controller.dart';
 import 'features/auth/login/ui/login_page.dart';
 import 'routes/app_routes.dart';
@@ -38,6 +39,10 @@ class LocalCouponsApp extends StatelessWidget {
               binding: BindingsBuilder(() {
                 Get.lazyPut<AdminDashboardController>(
                   () => AdminDashboardController(),
+                  fenix: true,
+                );
+                Get.lazyPut<AdminUsersController>(
+                  () => AdminUsersController(),
                   fenix: true,
                 );
               }),

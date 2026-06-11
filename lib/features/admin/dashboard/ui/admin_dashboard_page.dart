@@ -5,6 +5,7 @@ import '../../../../global/loading.dart';
 import '../../../../global/responsive.dart';
 import '../../dashboard/controller/admin_dashboard_controller.dart';
 import '../../dashboard/model/admin_dashboard_model.dart';
+import '../../users/ui/consumers_management_view.dart';
 
 class AdminDashboardPage extends GetView<AdminDashboardController> {
   const AdminDashboardPage({super.key});
@@ -12,7 +13,12 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const _DashboardDrawer(),
+      drawer: Obx(
+        () => _DashboardDrawer(
+          selectedTab: controller.selectedTab.value,
+          onSelectTab: controller.selectTab,
+        ),
+      ),
       body: SafeArea(
         child: ResponsiveLayout(
           builder: (context, info) {
@@ -20,21 +26,36 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
 
             return Obx(() {
               final dashboard = controller.overview.value;
+              final isDashboard = controller.selectedTab.value == 0;
+              final title = isDashboard ? 'Dashboard' : 'Consumers Management';
+              final subtitle = isDashboard
+                  ? 'Overview and analytics'
+                  : 'Manage consumer list';
 
               return Row(
                 children: [
-                  if (showSidebar) const _Sidebar(),
+                  if (showSidebar)
+                    _Sidebar(
+                      selectedTab: controller.selectedTab.value,
+                      onSelectTab: controller.selectTab,
+                    ),
                   Expanded(
                     child: Column(
                       children: [
-                        _TopBar(showMenu: !showSidebar),
+                        _TopBar(
+                          showMenu: !showSidebar,
+                          title: title,
+                          subtitle: subtitle,
+                        ),
                         Expanded(
-                          child: controller.isLoading.value || dashboard == null
-                              ? loading(value: 38)
-                              : _DashboardContent(
-                                  dashboard: dashboard,
-                                  info: info,
-                                ),
+                          child: controller.selectedTab.value == 0
+                              ? controller.isLoading.value || dashboard == null
+                                    ? loading(value: 38)
+                                    : _DashboardContent(
+                                        dashboard: dashboard,
+                                        info: info,
+                                      )
+                              : const ConsumersManagementView(),
                         ),
                       ],
                     ),
@@ -50,9 +71,15 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.showMenu});
+  const _TopBar({
+    required this.showMenu,
+    required this.title,
+    required this.subtitle,
+  });
 
   final bool showMenu;
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -74,12 +101,9 @@ class _TopBar extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Dashboard', style: Theme.of(context).textTheme.titleLarge),
+              Text(title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 2),
-              Text(
-                'Overview and analytics',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
           const Spacer(),
@@ -137,7 +161,10 @@ class _ProfilePill extends StatelessWidget {
 }
 
 class _Sidebar extends StatelessWidget {
-  const _Sidebar();
+  const _Sidebar({required this.selectedTab, required this.onSelectTab});
+
+  final int selectedTab;
+  final void Function(int index) onSelectTab;
 
   @override
   Widget build(BuildContext context) {
@@ -157,8 +184,8 @@ class _Sidebar extends StatelessWidget {
                 _SidebarItem(
                   icon: Icons.dashboard_rounded,
                   label: 'Dashboard',
-                  selected: true,
-                  onTap: () {},
+                  selected: selectedTab == 0,
+                  onTap: () => onSelectTab(0),
                 ),
                 _SidebarItem(
                   icon: Icons.storefront_outlined,
@@ -168,7 +195,8 @@ class _Sidebar extends StatelessWidget {
                 _SidebarItem(
                   icon: Icons.people_outline_rounded,
                   label: 'Consumers',
-                  onTap: () => _comingSoon(),
+                  selected: selectedTab == 1,
+                  onTap: () => onSelectTab(1),
                 ),
                 _SidebarItem(
                   icon: Icons.receipt_long_outlined,
@@ -200,11 +228,19 @@ class _Sidebar extends StatelessWidget {
 }
 
 class _DashboardDrawer extends StatelessWidget {
-  const _DashboardDrawer();
+  const _DashboardDrawer({
+    required this.selectedTab,
+    required this.onSelectTab,
+  });
+
+  final int selectedTab;
+  final void Function(int index) onSelectTab;
 
   @override
   Widget build(BuildContext context) {
-    return const Drawer(child: _Sidebar());
+    return Drawer(
+      child: _Sidebar(selectedTab: selectedTab, onSelectTab: onSelectTab),
+    );
   }
 }
 
