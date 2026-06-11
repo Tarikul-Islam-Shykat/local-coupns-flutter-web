@@ -25,60 +25,54 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
           builder: (context, info) {
             final showSidebar = info.isDesktop;
 
-            return Stack(
-              children: [
-                Obx(() {
-                  final dashboard = controller.overview.value;
-                  final isDashboard = controller.selectedTab.value == 0;
-                  final isUsers = controller.selectedTab.value == 1;
-                  final title = isDashboard
-                      ? 'Dashboard'
-                      : isUsers
-                      ? 'Users Management'
-                      : 'Issue Log';
-                  final subtitle = isDashboard
-                      ? 'Overview and analytics'
-                      : isUsers
-                      ? 'Manage all users'
-                      : 'Temporary log view for debugging';
+            return Obx(() {
+              final dashboard = controller.overview.value;
+              final isDashboard = controller.selectedTab.value == 0;
+              final isUsers = controller.selectedTab.value == 1;
+              final title = isDashboard
+                  ? 'Dashboard'
+                  : isUsers
+                  ? 'Users Management'
+                  : 'Support';
+              final subtitle = isDashboard
+                  ? 'Overview and analytics'
+                  : isUsers
+                  ? 'Manage all users'
+                  : 'Issue tracking and support logs';
 
-                  return Row(
-                    children: [
-                      if (showSidebar)
-                        _Sidebar(
-                          selectedTab: controller.selectedTab.value,
-                          onSelectTab: controller.selectTab,
+              return Row(
+                children: [
+                  if (showSidebar)
+                    _Sidebar(
+                      selectedTab: controller.selectedTab.value,
+                      onSelectTab: controller.selectTab,
+                    ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _TopBar(
+                          showMenu: !showSidebar,
+                          title: title,
+                          subtitle: subtitle,
                         ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            _TopBar(
-                              showMenu: !showSidebar,
-                              title: title,
-                              subtitle: subtitle,
-                            ),
-                            Expanded(
-                              child: controller.selectedTab.value == 0
-                                  ? controller.isLoading.value ||
-                                            dashboard == null
-                                        ? loading(value: 38)
-                                        : _DashboardContent(
-                                            dashboard: dashboard,
-                                            info: info,
-                                          )
-                                  : isUsers
-                                  ? const ConsumersManagementView()
-                                  : const _IssueLogView(),
-                            ),
-                          ],
+                        Expanded(
+                          child: controller.selectedTab.value == 0
+                              ? controller.isLoading.value || dashboard == null
+                                    ? loading(value: 38)
+                                    : _DashboardContent(
+                                        dashboard: dashboard,
+                                        info: info,
+                                      )
+                              : isUsers
+                              ? const ConsumersManagementView()
+                              : const _SupportView(),
                         ),
-                      ),
-                    ],
-                  );
-                }),
-                const IssueLogPanel(),
-              ],
-            );
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            });
           },
         ),
       ),
@@ -123,8 +117,37 @@ class _TopBar extends StatelessWidget {
             ],
           ),
           const Spacer(),
+          const _VersionBadge(),
+          const SizedBox(width: 12),
           const _ProfilePill(),
         ],
+      ),
+    );
+  }
+}
+
+class _VersionBadge extends StatelessWidget {
+  const _VersionBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final timeLabel =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFE7EDF3)),
+      ),
+      child: Text(
+        'v1.0 • $timeLabel',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: const Color(0xFF0F172A),
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -226,7 +249,7 @@ class _Sidebar extends StatelessWidget {
                 ),
                 _SidebarItem(
                   icon: Icons.report_gmailerrorred_outlined,
-                  label: 'Issues',
+                  label: 'Support',
                   selected: selectedTab == 2,
                   onTap: () => onSelectTab(2),
                 ),
@@ -244,30 +267,110 @@ class _Sidebar extends StatelessWidget {
   }
 }
 
-class _IssueLogView extends StatelessWidget {
-  const _IssueLogView();
+class _SupportView extends StatelessWidget {
+  const _SupportView();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 1100;
+
+        if (isWide) {
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: const [
+                Expanded(child: _SupportIntro()),
+                SizedBox(width: 18),
+                SizedBox(width: 380, child: IssueLogPanel()),
+              ],
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: const [
+              _SupportIntro(),
+              SizedBox(height: 18),
+              Expanded(child: IssueLogPanel(compact: true)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SupportIntro extends StatelessWidget {
+  const _SupportIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final updatedLabel =
+        'Updated ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+    return Container(
       padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE7EDF3)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Issue Log',
+            'Support',
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
-            'Use this tab to inspect dashboard, users, and API logs. Screenshots or image URLs will show inline when available.',
+            'Use this tab to inspect dashboard, users, and API logs. When an image URL is attached, it will appear inside the log card.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 18),
-          const Expanded(child: IssueLogPanel(compact: true)),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _InfoChip(label: 'Version 1.0'),
+              _InfoChip(label: updatedLabel),
+              _InfoChip(label: 'Live log feed'),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3E8),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFFFD6BF)),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: const Color(0xFFFF4000),
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
