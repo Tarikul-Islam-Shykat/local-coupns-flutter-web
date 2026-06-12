@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -6,6 +7,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../global/issue_log_panel.dart';
 import '../../../../global/loading.dart';
 import '../../../../global/responsive.dart';
+import '../../../../service/storage/local_storage/local_storage.dart';
+import '../../../../service/storage/secure/storage.dart';
 import '../../dashboard/controller/admin_dashboard_controller.dart';
 import '../../dashboard/model/admin_dashboard_model.dart';
 import '../../users/ui/consumers_management_view.dart';
@@ -357,6 +360,184 @@ class _SupportIntro extends StatelessWidget {
               _InfoChip(label: updatedLabel),
               _InfoChip(label: 'Live log feed'),
             ],
+          ),
+          const SizedBox(height: 18),
+          const _TokenDebugCard(),
+        ],
+      ),
+    );
+  }
+}
+
+class _TokenDebugCard extends StatefulWidget {
+  const _TokenDebugCard();
+
+  @override
+  State<_TokenDebugCard> createState() => _TokenDebugCardState();
+}
+
+class _TokenDebugCardState extends State<_TokenDebugCard> {
+  final _localService = LocalService();
+  final _secureStorage = SecureStorageService();
+
+  String? _localToken;
+  String? _secureToken;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTokens();
+  }
+
+  Future<void> _loadTokens() async {
+    final localToken = await _localService.getValue<String>(
+      PreferenceKey.token,
+    );
+    final secureToken = await _secureStorage.get(SecureStorageService.token);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _localToken = localToken;
+      _secureToken = secureToken;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE7EDF3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Stored Token Debug',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: _loadTokens,
+                tooltip: 'Refresh token values',
+                icon: const Icon(Icons.refresh_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Use this to check what token is currently stored before the dashboard request runs.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 16),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: LinearProgressIndicator(),
+            )
+          else ...[
+            _TokenValueRow(
+              label: 'Local storage',
+              storageKey: PreferenceKey.token.key,
+              value: _localToken,
+            ),
+            const SizedBox(height: 12),
+            _TokenValueRow(
+              label: 'Secure storage',
+              storageKey: SecureStorageService.token,
+              value: _secureToken,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TokenValueRow extends StatelessWidget {
+  const _TokenValueRow({
+    required this.label,
+    required this.storageKey,
+    required this.value,
+  });
+
+  final String label;
+  final String storageKey;
+  final String? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = (value == null || value!.trim().isEmpty) ? 'Missing' : value!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7EDF3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Key: $storageKey',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: text == 'Missing'
+                    ? null
+                    : () async {
+                        await Clipboard.setData(ClipboardData(text: text));
+                        Get.snackbar(
+                          'Copied',
+                          '$label token copied.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 2),
+                        );
+                      },
+                tooltip: 'Copy token',
+                icon: const Icon(Icons.copy_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SelectableText(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontFamily: 'monospace',
+              height: 1.45,
+              color: const Color(0xFF0F172A),
+            ),
           ),
         ],
       ),
