@@ -32,9 +32,7 @@ class AuthInterceptor extends Interceptor {
       log("AuthInterceptor: token found? ${token != null}");
 
       if (token != null) {
-        options.headers['Authorization'] = token.startsWith('Bearer ')
-            ? token
-            : 'Bearer $token';
+        options.headers['Authorization'] = 'Bearer $token';
       }
 
       await IssueLogService.instance.add(
@@ -63,14 +61,10 @@ class AuthInterceptor extends Interceptor {
       return 'Missing';
     }
 
-    final normalized = token.startsWith('Bearer ')
-        ? token.substring('Bearer '.length)
-        : token;
-
-    if (normalized.length <= 10) {
-      return normalized;
+    if (token.length <= 10) {
+      return token;
     }
 
-    return '${normalized.substring(0, 6)}...${normalized.substring(normalized.length - 4)}';
+    return '${token.substring(0, 6)}...${token.substring(token.length - 4)}';
   }
 }

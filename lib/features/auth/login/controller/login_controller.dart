@@ -179,12 +179,9 @@ class LoginController extends GetxController {
     if (token == null || token.trim().isEmpty) {
       return 'Missing';
     }
-    final normalized = token.startsWith('Bearer ')
-        ? token.substring('Bearer '.length)
-        : token;
-    if (normalized.length <= 10) {
-      return normalized;
+    if (token.length <= 10) {
+      return token;
     }
-    return '${normalized.substring(0, 6)}...${normalized.substring(normalized.length - 4)}';
+    return '${token.substring(0, 6)}...${token.substring(token.length - 4)}';
   }
 }

@@ -234,12 +234,10 @@ class ApiService {
         : value;
 
     if (token.length <= 10) {
-      return value;
+      return token;
     }
 
-    final masked =
-        '${token.substring(0, 6)}...${token.substring(token.length - 4)}';
-    return value.startsWith(bearerPrefix) ? '$bearerPrefix$masked' : masked;
+    return '${token.substring(0, 6)}...${token.substring(token.length - 4)}';
   }
 
   String _stringifyValue(dynamic value) {
