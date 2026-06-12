@@ -96,6 +96,31 @@ class AdminUser {
     return profiles.first.redemption;
   }
 
+  UserProfile? get primaryProfile => profiles.isEmpty ? null : profiles.first;
+
+  String get businessName => primaryProfile?.bussinessName ?? '-';
+
+  String get categoryLabel => primaryProfile?.category ?? '-';
+
+  int get activeOffers => primaryProfile?.activeOffers ?? 0;
+
+  int get ltv => primaryProfile?.ltv ?? 0;
+
+  String get subscriptionPlan {
+    if (userSubscriptions.isEmpty) return 'No plan';
+    final first = userSubscriptions.first;
+    if (first is Map<String, dynamic>) {
+      final subscriptionOffer = first['subscriptionOffer'];
+      if (subscriptionOffer is Map<String, dynamic>) {
+        final planName = subscriptionOffer['planName']?.toString().trim();
+        if (planName != null && planName.isNotEmpty) {
+          return planName;
+        }
+      }
+    }
+    return 'No plan';
+  }
+
   String get initial {
     final trimmed = fullName.trim();
     if (trimmed.isEmpty) return '?';

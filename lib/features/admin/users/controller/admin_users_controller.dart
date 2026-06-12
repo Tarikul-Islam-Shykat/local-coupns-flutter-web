@@ -9,15 +9,18 @@ import '../../../../service/network/service/api_service.dart';
 import '../model/admin_user_model.dart';
 
 class AdminUsersController extends GetxController {
+  static const shopperRole = 'SHOPPER';
+  static const merchantRole = 'BUSSINESS_OWNER';
+
   final isLoading = false.obs;
   final users = <AdminUser>[].obs;
   final meta = Rxn<UserMeta>();
 
   final searchController = TextEditingController();
-  final selectedRole = 'SHOPPER'.obs;
+  final selectedRole = shopperRole.obs;
   final selectedStatus = ''.obs;
 
-  final roles = const ['SHOPPER', 'BUSSINESS_OWNER'];
+  final roles = const [shopperRole, merchantRole];
   final statuses = const ['', 'ACTIVE', 'PENDING', 'BLOCKED'];
 
   final api = ApiService.instance;
@@ -101,8 +104,30 @@ class AdminUsersController extends GetxController {
 
   void clearFilters() {
     searchController.clear();
-    selectedRole.value = 'SHOPPER';
+    selectedRole.value = shopperRole;
     selectedStatus.value = '';
+    loadUsers();
+  }
+
+  void showConsumers() {
+    if (selectedRole.value == shopperRole && searchController.text.isEmpty) {
+      loadUsers();
+      return;
+    }
+    searchController.clear();
+    selectedStatus.value = '';
+    selectedRole.value = shopperRole;
+    loadUsers();
+  }
+
+  void showMerchants() {
+    if (selectedRole.value == merchantRole && searchController.text.isEmpty) {
+      loadUsers();
+      return;
+    }
+    searchController.clear();
+    selectedStatus.value = '';
+    selectedRole.value = merchantRole;
     loadUsers();
   }
 
@@ -111,5 +136,7 @@ class AdminUsersController extends GetxController {
   }
 
   String get displaySectionLabel =>
-      selectedRole.value == 'BUSSINESS_OWNER' ? 'Merchants' : 'Consumers';
+      selectedRole.value == merchantRole ? 'Merchants' : 'Consumers';
+
+  bool get isMerchantMode => selectedRole.value == merchantRole;
 }

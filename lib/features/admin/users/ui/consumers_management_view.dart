@@ -15,6 +15,7 @@ class ConsumersManagementView extends GetView<AdminUsersController> {
       final info = context.responsive;
       final users = controller.users;
       final meta = controller.meta.value;
+      final isMerchantMode = controller.isMerchantMode;
 
       return SingleChildScrollView(
         padding: EdgeInsets.all(
@@ -23,7 +24,7 @@ class ConsumersManagementView extends GetView<AdminUsersController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Header(info: info),
+            _Header(info: info, isMerchantMode: isMerchantMode),
             const SizedBox(height: 18),
             _FilterCard(controller: controller),
             const SizedBox(height: 18),
@@ -49,14 +50,20 @@ class ConsumersManagementView extends GetView<AdminUsersController> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'All Users (${meta?.total ?? users.length})',
+                          '${controller.displaySectionLabel} (${meta?.total ?? users.length})',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 18),
                         if (info.isDesktop)
-                          _UsersTable(users: users)
+                          _UsersTable(
+                            users: users,
+                            isMerchantMode: isMerchantMode,
+                          )
                         else
-                          _UsersCards(users: users),
+                          _UsersCards(
+                            users: users,
+                            isMerchantMode: isMerchantMode,
+                          ),
                       ],
                     ),
             ),
@@ -68,9 +75,10 @@ class ConsumersManagementView extends GetView<AdminUsersController> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.info});
+  const _Header({required this.info, required this.isMerchantMode});
 
   final ResponsiveInfo info;
+  final bool isMerchantMode;
 
   @override
   Widget build(BuildContext context) {
@@ -81,14 +89,16 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Users Management',
+                isMerchantMode ? 'Merchants Management' : 'Users Management',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                'Manage all users from one place',
+                isMerchantMode
+                    ? 'Review business owner accounts, stores, and subscription details'
+                    : 'Manage all users from one place',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -286,9 +296,10 @@ class _FilterDropdown<T> extends StatelessWidget {
 }
 
 class _UsersTable extends StatelessWidget {
-  const _UsersTable({required this.users});
+  const _UsersTable({required this.users, required this.isMerchantMode});
 
   final List<AdminUser> users;
+  final bool isMerchantMode;
 
   @override
   Widget build(BuildContext context) {
@@ -296,30 +307,63 @@ class _UsersTable extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: DataTable(
         headingRowColor: const WidgetStatePropertyAll<Color>(Color(0xFFF8FAFC)),
-        columns: const [
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Email')),
-          DataColumn(label: Text('Redemptions')),
-          DataColumn(label: Text('Actions')),
-        ],
+        columns: isMerchantMode
+            ? const [
+                DataColumn(label: Text('Owner')),
+                DataColumn(label: Text('Business')),
+                DataColumn(label: Text('Category')),
+                DataColumn(label: Text('Offers')),
+                DataColumn(label: Text('Plan')),
+                DataColumn(label: Text('Actions')),
+              ]
+            : const [
+                DataColumn(label: Text('Name')),
+                DataColumn(label: Text('Email')),
+                DataColumn(label: Text('Redemptions')),
+                DataColumn(label: Text('Actions')),
+              ],
         rows: users
             .map(
               (user) => DataRow(
-                cells: [
-                  DataCell(_NameCell(user: user)),
-                  DataCell(Text(user.email)),
-                  DataCell(Text(user.redemptions.toString())),
-                  DataCell(
-                    OutlinedButton.icon(
-                      onPressed: () => Get.snackbar(
-                        user.fullName,
-                        '${user.role} • ${user.status}',
-                      ),
-                      icon: const Icon(Icons.visibility_outlined, size: 16),
-                      label: const Text('View'),
-                    ),
-                  ),
-                ],
+                cells: isMerchantMode
+                    ? [
+                        DataCell(_NameCell(user: user, isMerchantMode: true)),
+                        DataCell(Text(user.businessName)),
+                        DataCell(Text(_prettyCategory(user.categoryLabel))),
+                        DataCell(Text(user.activeOffers.toString())),
+                        DataCell(Text(user.subscriptionPlan)),
+                        DataCell(
+                          OutlinedButton.icon(
+                            onPressed: () => Get.snackbar(
+                              user.businessName,
+                              '${user.status} • ${user.subscriptionPlan}',
+                            ),
+                            icon: const Icon(
+                              Icons.visibility_outlined,
+                              size: 16,
+                            ),
+                            label: const Text('View'),
+                          ),
+                        ),
+                      ]
+                    : [
+                        DataCell(_NameCell(user: user, isMerchantMode: false)),
+                        DataCell(Text(user.email)),
+                        DataCell(Text(user.redemptions.toString())),
+                        DataCell(
+                          OutlinedButton.icon(
+                            onPressed: () => Get.snackbar(
+                              user.fullName,
+                              '${user.role} • ${user.status}',
+                            ),
+                            icon: const Icon(
+                              Icons.visibility_outlined,
+                              size: 16,
+                            ),
+                            label: const Text('View'),
+                          ),
+                        ),
+                      ],
               ),
             )
             .toList(),
@@ -329,9 +373,10 @@ class _UsersTable extends StatelessWidget {
 }
 
 class _UsersCards extends StatelessWidget {
-  const _UsersCards({required this.users});
+  const _UsersCards({required this.users, required this.isMerchantMode});
 
   final List<AdminUser> users;
+  final bool isMerchantMode;
 
   @override
   Widget build(BuildContext context) {
@@ -340,7 +385,7 @@ class _UsersCards extends StatelessWidget {
           .map(
             (user) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _UserCard(user: user),
+              child: _UserCard(user: user, isMerchantMode: isMerchantMode),
             ),
           )
           .toList(),
@@ -349,9 +394,10 @@ class _UsersCards extends StatelessWidget {
 }
 
 class _UserCard extends StatelessWidget {
-  const _UserCard({required this.user});
+  const _UserCard({required this.user, required this.isMerchantMode});
 
   final AdminUser user;
+  final bool isMerchantMode;
 
   @override
   Widget build(BuildContext context) {
@@ -379,19 +425,37 @@ class _UserCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(child: _NameCell(user: user)),
+              Expanded(
+                child: _NameCell(user: user, isMerchantMode: isMerchantMode),
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(user.email, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 6),
-          Text('Redemptions: ${user.redemptions}'),
+          if (isMerchantMode) ...[
+            Text(user.email, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 6),
+            Text('Business: ${user.businessName}'),
+            const SizedBox(height: 4),
+            Text('Category: ${_prettyCategory(user.categoryLabel)}'),
+            const SizedBox(height: 4),
+            Text('Active offers: ${user.activeOffers}'),
+            const SizedBox(height: 4),
+            Text('Plan: ${user.subscriptionPlan}'),
+          ] else ...[
+            Text(user.email, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 6),
+            Text('Redemptions: ${user.redemptions}'),
+          ],
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
             child: OutlinedButton.icon(
-              onPressed: () =>
-                  Get.snackbar(user.fullName, '${user.role} • ${user.status}'),
+              onPressed: () => Get.snackbar(
+                isMerchantMode ? user.businessName : user.fullName,
+                isMerchantMode
+                    ? '${user.status} • ${user.subscriptionPlan}'
+                    : '${user.role} • ${user.status}',
+              ),
               icon: const Icon(Icons.visibility_outlined, size: 16),
               label: const Text('View'),
             ),
@@ -403,9 +467,10 @@ class _UserCard extends StatelessWidget {
 }
 
 class _NameCell extends StatelessWidget {
-  const _NameCell({required this.user});
+  const _NameCell({required this.user, required this.isMerchantMode});
 
   final AdminUser user;
+  final bool isMerchantMode;
 
   @override
   Widget build(BuildContext context) {
@@ -414,13 +479,16 @@ class _NameCell extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          user.fullName,
+          isMerchantMode ? user.businessName : user.fullName,
           style: Theme.of(
             context,
           ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 2),
-        Text('@${user.userName}', style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          isMerchantMode ? user.fullName : '@${user.userName}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }
@@ -455,4 +523,18 @@ class _EmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+String _prettyCategory(String value) {
+  if (value.trim().isEmpty || value == '-') {
+    return '-';
+  }
+  return value
+      .split('_')
+      .map(
+        (part) => part.isEmpty
+            ? part
+            : '${part[0]}${part.substring(1).toLowerCase()}',
+      )
+      .join(' ');
 }

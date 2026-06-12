@@ -9,6 +9,7 @@ import '../../../../global/loading.dart';
 import '../../../../global/responsive.dart';
 import '../../../../service/storage/local_storage/local_storage.dart';
 import '../../../../service/storage/secure/storage.dart';
+import '../../offers/ui/offer_review_view.dart';
 import '../../dashboard/controller/admin_dashboard_controller.dart';
 import '../../dashboard/model/admin_dashboard_model.dart';
 import '../../users/ui/consumers_management_view.dart';
@@ -33,16 +34,26 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
             return Obx(() {
               final dashboard = controller.overview.value;
               final isDashboard = controller.selectedTab.value == 0;
-              final isUsers = controller.selectedTab.value == 1;
+              final isMerchants = controller.selectedTab.value == 1;
+              final isUsers = controller.selectedTab.value == 2;
+              final isOffers = controller.selectedTab.value == 3;
               final title = isDashboard
                   ? 'Dashboard'
+                  : isMerchants
+                  ? 'Merchants'
                   : isUsers
                   ? 'Users Management'
+                  : isOffers
+                  ? 'Offer Review'
                   : 'Support';
               final subtitle = isDashboard
                   ? 'Overview and analytics'
+                  : isMerchants
+                  ? 'Business owner accounts and profile data'
                   : isUsers
                   ? 'Manage all users'
+                  : isOffers
+                  ? 'Review offers across the app before they go live'
                   : 'Issue tracking and support logs';
 
               return Row(
@@ -79,8 +90,10 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                                             controller.isUnauthorized,
                                         onRetry: controller.fetchDashboard,
                                       )
-                              : isUsers
+                              : isMerchants || isUsers
                               ? const ConsumersManagementView()
+                              : isOffers
+                              ? const OfferReviewView()
                               : const _SupportView(),
                         ),
                       ],
@@ -245,18 +258,20 @@ class _Sidebar extends StatelessWidget {
                 _SidebarItem(
                   icon: Icons.storefront_outlined,
                   label: 'Merchants',
-                  onTap: () => _comingSoon(),
-                ),
-                _SidebarItem(
-                  icon: Icons.people_outline_rounded,
-                  label: 'Users',
                   selected: selectedTab == 1,
                   onTap: () => onSelectTab(1),
                 ),
                 _SidebarItem(
+                  icon: Icons.people_outline_rounded,
+                  label: 'Users',
+                  selected: selectedTab == 2,
+                  onTap: () => onSelectTab(2),
+                ),
+                _SidebarItem(
                   icon: Icons.receipt_long_outlined,
-                  label: 'Redemptions',
-                  onTap: () => _comingSoon(),
+                  label: 'Offer Review',
+                  selected: selectedTab == 3,
+                  onTap: () => onSelectTab(3),
                 ),
                 _SidebarItem(
                   icon: Icons.subscriptions_outlined,
@@ -266,8 +281,8 @@ class _Sidebar extends StatelessWidget {
                 _SidebarItem(
                   icon: Icons.report_gmailerrorred_outlined,
                   label: 'Support',
-                  selected: selectedTab == 2,
-                  onTap: () => onSelectTab(2),
+                  selected: selectedTab == 4,
+                  onTap: () => onSelectTab(4),
                 ),
               ],
             ),
@@ -833,7 +848,7 @@ class _DashboardStatusView extends StatelessWidget {
                     if (isUnauthorized)
                       OutlinedButton.icon(
                         onPressed: () =>
-                            Get.find<AdminDashboardController>().selectTab(2),
+                            Get.find<AdminDashboardController>().selectTab(4),
                         icon: const Icon(Icons.bug_report_outlined),
                         label: const Text('Open support log'),
                       ),
@@ -867,8 +882,9 @@ class _BuildStatusBlockState extends State<_BuildStatusBlock> {
         final packageInfo = snapshot.data;
         final versionLabel = packageInfo == null
             ? 'Build loading...'
-            : 'Build v';
-        final loadedLabel = 'Loaded: 12.6.2026. 3:37 PM Version';
+            : 'Build v${packageInfo.version}+${packageInfo.buildNumber}';
+        final loadedLabel =
+            'Loaded: ${DateFormat('dd MMM yyyy, hh:mm a').format(_loadedAt)}';
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

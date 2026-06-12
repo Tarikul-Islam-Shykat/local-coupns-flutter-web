@@ -8,6 +8,8 @@ import '../../../../global/custom_snackbar.dart';
 import '../../../../global/issue_log_service.dart';
 import '../../../../service/network/endpoints/endpoints.dart';
 import '../../../../service/network/instance/network_client.dart';
+import '../../offers/controller/admin_offers_controller.dart';
+import '../../users/controller/admin_users_controller.dart';
 import '../model/admin_dashboard_model.dart';
 
 class AdminDashboardController extends GetxController {
@@ -91,6 +93,28 @@ class AdminDashboardController extends GetxController {
         );
         showSnackBar(false, dashboardErrorMessage.value!);
       }
+    } on DioException catch (error, stackTrace) {
+      final statusCode = error.response?.statusCode;
+      final responseData = error.response?.data;
+      final extractedMessage =
+          _extractMessage(responseData) ??
+          error.message ??
+          'Failed to load dashboard.';
+
+      dashboardStatusCode.value = statusCode;
+      dashboardErrorMessage.value = extractedMessage;
+
+      log('Dashboard Dio error: $error', stackTrace: stackTrace);
+      await IssueLogService.instance.add(
+        'Dashboard request failed',
+        level: 'error',
+        details:
+            'GET ${Urls.adminDashboardOverview}\n'
+            'Status: ${statusCode ?? "unknown"}\n'
+            'Message: $extractedMessage\n'
+            'Response body: ${responseData ?? "null"}',
+      );
+      showSnackBar(false, extractedMessage);
     } catch (error, stackTrace) {
       dashboardErrorMessage.value = 'Failed to load dashboard.';
       log('Dashboard error: $error', stackTrace: stackTrace);
@@ -107,6 +131,17 @@ class AdminDashboardController extends GetxController {
 
   void selectTab(int index) {
     selectedTab.value = index;
+    if (Get.isRegistered<AdminUsersController>()) {
+      final usersController = Get.find<AdminUsersController>();
+      if (index == 1) {
+        usersController.showMerchants();
+      } else if (index == 2) {
+        usersController.showConsumers();
+      }
+    }
+    if (index == 3 && Get.isRegistered<AdminOffersController>()) {
+      Get.find<AdminOffersController>().loadOffers();
+    }
   }
 
   bool get isUnauthorized =>
