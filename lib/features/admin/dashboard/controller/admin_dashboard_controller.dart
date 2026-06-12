@@ -9,6 +9,7 @@ import '../../../../global/issue_log_service.dart';
 import '../../../../service/network/endpoints/endpoints.dart';
 import '../../../../service/network/instance/network_client.dart';
 import '../../offers/controller/admin_offers_controller.dart';
+import '../../subscriptions/controller/admin_subscriptions_controller.dart';
 import '../../users/controller/admin_users_controller.dart';
 import '../model/admin_dashboard_model.dart';
 
@@ -141,6 +142,9 @@ class AdminDashboardController extends GetxController {
     }
     if (index == 3 && Get.isRegistered<AdminOffersController>()) {
       Get.find<AdminOffersController>().loadOffers();
+    }
+    if (index == 4 && Get.isRegistered<AdminSubscriptionsController>()) {
+      Get.find<AdminSubscriptionsController>().loadSubscriptions();
     }
   }
 

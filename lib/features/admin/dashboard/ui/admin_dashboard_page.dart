@@ -10,6 +10,7 @@ import '../../../../global/responsive.dart';
 import '../../../../service/storage/local_storage/local_storage.dart';
 import '../../../../service/storage/secure/storage.dart';
 import '../../offers/ui/offer_review_view.dart';
+import '../../subscriptions/ui/admin_subscriptions_view.dart';
 import '../../dashboard/controller/admin_dashboard_controller.dart';
 import '../../dashboard/model/admin_dashboard_model.dart';
 import '../../users/ui/consumers_management_view.dart';
@@ -37,6 +38,7 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
               final isMerchants = controller.selectedTab.value == 1;
               final isUsers = controller.selectedTab.value == 2;
               final isOffers = controller.selectedTab.value == 3;
+              final isSubscriptions = controller.selectedTab.value == 4;
               final title = isDashboard
                   ? 'Dashboard'
                   : isMerchants
@@ -45,6 +47,8 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                   ? 'Users Management'
                   : isOffers
                   ? 'Offer Review'
+                  : isSubscriptions
+                  ? 'Subscriptions'
                   : 'Support';
               final subtitle = isDashboard
                   ? 'Overview and analytics'
@@ -54,6 +58,8 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                   ? 'Manage all users'
                   : isOffers
                   ? 'Review offers across the app before they go live'
+                  : isSubscriptions
+                  ? 'View, edit, and add subscription plans'
                   : 'Issue tracking and support logs';
 
               return Row(
@@ -94,6 +100,8 @@ class AdminDashboardPage extends GetView<AdminDashboardController> {
                               ? const ConsumersManagementView()
                               : isOffers
                               ? const OfferReviewView()
+                              : isSubscriptions
+                              ? const AdminSubscriptionsView()
                               : const _SupportView(),
                         ),
                       ],
@@ -276,13 +284,14 @@ class _Sidebar extends StatelessWidget {
                 _SidebarItem(
                   icon: Icons.subscriptions_outlined,
                   label: 'Subscriptions',
-                  onTap: () => _comingSoon(),
+                  selected: selectedTab == 4,
+                  onTap: () => onSelectTab(4),
                 ),
                 _SidebarItem(
                   icon: Icons.report_gmailerrorred_outlined,
                   label: 'Support',
-                  selected: selectedTab == 4,
-                  onTap: () => onSelectTab(4),
+                  selected: selectedTab == 5,
+                  onTap: () => onSelectTab(5),
                 ),
               ],
             ),
@@ -291,10 +300,6 @@ class _Sidebar extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _comingSoon() {
-    Get.snackbar('Coming soon', 'This section is not built yet.');
   }
 }
 
@@ -848,7 +853,7 @@ class _DashboardStatusView extends StatelessWidget {
                     if (isUnauthorized)
                       OutlinedButton.icon(
                         onPressed: () =>
-                            Get.find<AdminDashboardController>().selectTab(4),
+                            Get.find<AdminDashboardController>().selectTab(5),
                         icon: const Icon(Icons.bug_report_outlined),
                         label: const Text('Open support log'),
                       ),
