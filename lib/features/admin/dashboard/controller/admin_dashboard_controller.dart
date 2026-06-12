@@ -36,7 +36,7 @@ class AdminDashboardController extends GetxController {
 
       final response = await NetworkClient.instance.dio.get(
         Urls.adminDashboardOverview,
-        options: Options(extra: {'auth': true, 'sendBearerToken': false}),
+        options: Options(extra: {'auth': true}),
       );
       final statusCode = response.statusCode;
       final body = response.data;

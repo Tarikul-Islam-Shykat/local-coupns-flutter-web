@@ -867,9 +867,8 @@ class _BuildStatusBlockState extends State<_BuildStatusBlock> {
         final packageInfo = snapshot.data;
         final versionLabel = packageInfo == null
             ? 'Build loading...'
-            : 'Build v${packageInfo.version}+${packageInfo.buildNumber}';
-        final loadedLabel =
-            'Loaded: ${DateFormat('dd MMM yyyy, hh:mm a').format(_loadedAt)}';
+            : 'Build v';
+        final loadedLabel = 'Loaded: 12.6.2026. 3:37 PM Version';
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

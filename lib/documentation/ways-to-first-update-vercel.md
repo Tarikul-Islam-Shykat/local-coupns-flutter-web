@@ -171,30 +171,29 @@ Short note to send to backend dev:
 
 ## 13. Dashboard loads but users load differently
 
-If the users list works but the dashboard overview still says it cannot be loaded, check the auth style the backend expects.
+If the users list works but the dashboard overview still says it cannot be loaded, check whether the dashboard request is actually sending the bearer token.
 
 What happened in this project:
 
-- Login returns a JSON token and also sets an `HttpOnly` cookie.
+- Login returns a JSON token.
 - The `/users` endpoint works with a bearer token in the `Authorization` header.
-- The `/admindashboards` endpoint rejected the bearer token and needed the browser cookie instead.
+- The dashboard can fail if the request is forced into cookie auth and skips the bearer token.
 
 What to fix:
 
-- Make sure Flutter web sends browser credentials for cookie-based auth.
-- Do not force a bearer token on endpoints that should use the cookie.
-- Keep bearer auth for endpoints like `/users` if they already work that way.
+- Make sure the dashboard request sends `Authorization: Bearer <token>`.
+- Check the Support tab to confirm the token exists in storage.
+- Check the debug log to confirm the dashboard request is using `Bearer auth`.
 
 How to recognize it:
 
 - `/users` works in Flutter web.
-- `/admindashboards` returns `null` or an unexpected auth error.
-- Postman may work differently because it can send headers manually, while the browser also has cookie rules.
+- `/admindashboards` says unauthorized.
+- The Support log shows `Bearer token: not sent` or `sendBearerToken=false`.
 
 Admin navigation note:
 
 - The all-user list lives in the sidebar tab labeled `Users`.
 - That tab opens the same user-management screen, which can filter by consumer or merchant role.
-
 
 
