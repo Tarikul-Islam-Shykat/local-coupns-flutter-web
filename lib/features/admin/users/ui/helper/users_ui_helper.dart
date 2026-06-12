@@ -35,3 +35,14 @@ String userStatusSummary(AdminUser user, bool isMerchantMode) {
       ? '${user.status} • ${user.subscriptionPlan}'
       : '${user.role} • ${user.status}';
 }
+
+String merchantVerificationLabel(AdminUser user) {
+  if (user.emailVerified) {
+    return 'Verified';
+  }
+  return user.status.toUpperCase() == 'PENDING' ? 'Pending' : 'Unverified';
+}
+
+String merchantLtvLabel(AdminUser user) {
+  return '\$${user.ltv}';
+}

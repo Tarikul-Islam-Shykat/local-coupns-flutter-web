@@ -115,16 +115,18 @@ class _DesktopHeaderRow extends StatelessWidget {
       child: Row(
         children: isMerchantMode
             ? const [
-                _HeaderCell(label: 'Owner', flex: 3),
-                _HeaderCell(label: 'Business', flex: 2),
+                _HeaderCell(label: 'Merchant', flex: 4),
                 _HeaderCell(label: 'Category', flex: 2),
-                _HeaderCell(label: 'Offers', flex: 1),
                 _HeaderCell(label: 'Plan', flex: 2),
+                _HeaderCell(label: 'LTV', flex: 1),
+                _HeaderCell(label: 'Verification', flex: 2),
+                _HeaderCell(label: 'Active Offers', flex: 1),
+                _HeaderCell(label: 'Redemptions', flex: 1),
                 _HeaderCell(label: 'Actions', flex: 1),
               ]
             : const [
-                _HeaderCell(label: 'Name', flex: 3),
-                _HeaderCell(label: 'Email', flex: 3),
+                _HeaderCell(label: 'Name', flex: 4),
+                _HeaderCell(label: 'Email', flex: 5),
                 _HeaderCell(label: 'Redemptions', flex: 2),
                 _HeaderCell(label: 'Actions', flex: 1),
               ],
@@ -147,16 +149,21 @@ class _DesktopDataRow extends StatelessWidget {
         children: isMerchantMode
             ? [
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: _NameCell(user: user, isMerchantMode: true),
                 ),
-                Expanded(flex: 2, child: Text(user.businessName)),
                 Expanded(
                   flex: 2,
                   child: Text(prettyCategory(user.categoryLabel)),
                 ),
+                Expanded(
+                  flex: 2,
+                  child: _PlanPill(plan: user.subscriptionPlan),
+                ),
+                Expanded(flex: 1, child: Text(merchantLtvLabel(user))),
+                Expanded(flex: 2, child: _VerificationPill(user: user)),
                 Expanded(flex: 1, child: Text(user.activeOffers.toString())),
-                Expanded(flex: 2, child: Text(user.subscriptionPlan)),
+                Expanded(flex: 1, child: Text(user.redemptions.toString())),
                 Expanded(
                   flex: 1,
                   child: Align(
@@ -167,10 +174,15 @@ class _DesktopDataRow extends StatelessWidget {
               ]
             : [
                 Expanded(
-                  flex: 3,
-                  child: _NameCell(user: user, isMerchantMode: false),
+                  flex: 4,
+                  child: Text(
+                    user.fullName,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-                Expanded(flex: 3, child: Text(user.email)),
+                Expanded(flex: 5, child: Text(user.email)),
                 Expanded(flex: 2, child: Text(user.redemptions.toString())),
                 Expanded(
                   flex: 1,
@@ -200,6 +212,84 @@ class _HeaderCell extends StatelessWidget {
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
           color: const Color(0xFF475569),
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanPill extends StatelessWidget {
+  const _PlanPill({required this.plan});
+
+  final String plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = plan.toLowerCase();
+    final isSpotlight = normalized.contains('spot');
+
+    return _InfoPill(
+      label: plan,
+      background: isSpotlight
+          ? const Color(0xFFFFE9DD)
+          : const Color(0xFFE8EEFF),
+      foreground: isSpotlight
+          ? const Color(0xFFFF5A1F)
+          : const Color(0xFF3B82F6),
+    );
+  }
+}
+
+class _VerificationPill extends StatelessWidget {
+  const _VerificationPill({required this.user});
+
+  final AdminUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    final isVerified = user.emailVerified;
+
+    return _InfoPill(
+      label: merchantVerificationLabel(user),
+      background: isVerified
+          ? const Color(0xFFE8F9E8)
+          : const Color(0xFFFFF4D6),
+      foreground: isVerified
+          ? const Color(0xFF22C55E)
+          : const Color(0xFFCA8A04),
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: foreground,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
